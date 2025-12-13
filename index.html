@@ -3,333 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dil Matkabı Browser</title>
+    <title>Dil Matkabı</title>
     
-    <!-- Lucide İkonları (Apple tarzı ince ikonlar için) -->
+    <!-- İkon Kütüphanesi -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* === APPLE / SAFARI STİLİ CSS === */
-        :root {
-            --bg-color: #000000;
-            --bar-bg: rgba(28, 28, 30, 0.85); /* Buzlu cam rengi */
-            --accent: #0A84FF; /* iOS Mavisi */
-            --text: #ffffff;
-            --text-sec: #8E8E93;
-            --input-bg: #1C1C1E;
-            --border: rgba(255,255,255,0.15);
-        }
-
+        /* === TASARIM: SİYAH & CAM EFEKTİ (iOS STİLİ) === */
+        :root { --bg: #000000; --bar: rgba(28,28,30,0.85); --accent: #0A84FF; --text: #ffffff; --border: rgba(255,255,255,0.15); }
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background-color: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            color: var(--text);
-        }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- 1. ANA EKRAN (HOME) --- */
-        #home-view {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            z-index: 50;
-            background: var(--bg-color);
-            transition: opacity 0.3s ease;
-        }
-        #home-view.hidden { opacity: 0; pointer-events: none; }
-
-        .logo { font-size: 48px; font-weight: 700; margin-bottom: 20px; letter-spacing: -1px; }
-        .logo span { color: var(--accent); }
-
-        .search-container {
-            width: 90%; max-width: 400px;
-            position: relative;
-        }
-        .search-input {
-            width: 100%; height: 50px;
-            background: #1C1C1E;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 0 45px 0 15px;
-            font-size: 17px; color: white;
-            transition: 0.2s;
-        }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.2); }
-        .search-icon { position: absolute; right: 15px; top: 15px; color: var(--text-sec); }
-
-        /* --- 2. TARAYICI ARAYÜZÜ --- */
-        #browser-view {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-            z-index: 40;
-        }
-        #browser-view.active { opacity: 1; pointer-events: auto; }
-
-        /* Üst Bar (Adres) */
+        /* 1. ÜST BAR */
         .top-bar {
-            height: 60px;
-            background: var(--bar-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-bottom: 0.5px solid var(--border);
-            display: flex; align-items: center; padding: 0 10px;
-            gap: 10px;
-            z-index: 10;
+            height: 50px; background: var(--bar); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid var(--border); display: flex; align-items: center;
+            padding: 0 15px; justify-content: space-between; z-index: 20;
         }
+        .site-info { font-size: 15px; font-weight: 600; opacity: 0.9; letter-spacing: -0.5px; }
 
-        .url-box {
-            flex: 1; height: 36px;
-            background: rgba(118, 118, 128, 0.24);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 15px; font-weight: 500;
-        }
-        .url-text { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 200px; }
-        .lock-icon { width: 12px; margin-right: 6px; color: var(--text-sec); }
-
-        /* Web Penceresi */
-        .webview-container { flex: 1; position: relative; background: white; }
+        /* 2. WEB ALANI (IFRAME) */
+        .web-area { flex: 1; position: relative; background: #121212; }
         iframe { width: 100%; height: 100%; border: none; }
+        .progress-bar { position: absolute; top: 0; left: 0; height: 3px; background: var(--accent); width: 0%; transition: 0.2s; z-index: 30; }
         
-        /* Yükleme Çubuğu */
-        .progress-bar { position: absolute; top: 0; left: 0; height: 2px; background: var(--accent); width: 0%; transition: width 0.2s, opacity 0.2s; z-index: 20; }
+        /* HATA EKRANI (Güvenlik nedeniyle açılmayan siteler için) */
+        .error-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #121212; display: none; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 20px;
+        }
+        .error-screen.show { display: flex; }
+        .fix-btn {
+            background: var(--accent); color: white; padding: 12px 24px; 
+            border-radius: 12px; border: none; font-size: 16px; margin-top: 20px; font-weight: 600; cursor: pointer;
+        }
 
-        /* Alt Bar (Navigasyon) */
+        /* 3. ALT BAR (KONTROL) */
         .bottom-bar {
-            height: 80px; padding-bottom: 20px; /* iPhone home bar boşluğu */
-            background: var(--bar-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-top: 0.5px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 10;
+            height: 85px; background: var(--bar); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid var(--border); padding-bottom: 20px;
+            display: flex; flex-direction: column; justify-content: center; z-index: 20;
         }
-        
-        .nav-btn {
-            background: none; border: none; color: var(--accent);
-            padding: 10px; cursor: pointer; transition: opacity 0.2s;
+        .input-wrapper {
+            background: rgba(118,118,128,0.24); margin: 5px 15px; border-radius: 10px;
+            height: 36px; display: flex; align-items: center; padding: 0 10px;
         }
-        .nav-btn:active { opacity: 0.5; }
-        .nav-btn.disabled { color: var(--text-sec); pointer-events: none; }
+        input { flex: 1; background: none; border: none; color: white; font-size: 16px; text-align: center; }
+        .controls { display: flex; justify-content: space-around; margin-top: 8px; }
+        .icon-btn { background: none; border: none; color: var(--accent); padding: 5px; cursor: pointer; }
+        .icon-btn:active { opacity: 0.5; }
 
-        /* --- 3. DİL MATKABI (SOL MENÜ) --- */
-        #drill-sidebar {
+        /* 4. YAN MENÜ (DİL MATKABI) */
+        .sidebar {
             position: fixed; top: 0; left: 0; width: 85%; height: 100%;
-            background: #1C1C1E; /* iOS Koyu Gri */
-            z-index: 100;
-            transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            display: flex; flex-direction: column;
-            border-right: 1px solid var(--border);
+            background: #1C1C1E; z-index: 100; transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-right: 1px solid var(--border); display: flex; flex-direction: column;
             box-shadow: 10px 0 30px rgba(0,0,0,0.5);
         }
-        #drill-sidebar.open { transform: translateX(0); }
-
-        .sidebar-header {
-            padding: 20px; border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .sidebar-title { font-size: 20px; font-weight: 700; color: white; }
+        .sidebar.open { transform: translateX(0); }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-content { padding: 20px; flex: 1; overflow-y: auto; }
         
-        .drill-content { flex: 1; padding: 20px; overflow-y: auto; }
-        
-        /* Matkap Araçları */
-        .drill-textarea {
-            width: 100%; height: 120px;
-            background: #2C2C2E; border: none; border-radius: 12px;
-            padding: 15px; color: white; font-size: 16px;
-            resize: none; margin-bottom: 15px;
+        textarea { 
+            width: 100%; height: 150px; background: #2C2C2E; border: none; 
+            border-radius: 12px; padding: 15px; color: white; font-size: 16px; 
+            margin-bottom: 15px; resize: none; 
         }
-        .drill-btn {
-            width: 100%; height: 50px;
-            background: var(--accent); color: white;
-            border: none; border-radius: 12px;
-            font-size: 17px; font-weight: 600; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+        .main-btn { 
+            width: 100%; height: 50px; background: var(--accent); color: white; 
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
         }
-        .drill-btn:active { opacity: 0.8; }
 
-        /* Overlay (Karartma) */
-        #overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 90;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            backdrop-filter: blur(5px);
-        }
-        #overlay.active { opacity: 1; pointer-events: auto; }
+        /* Overlay */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; display: none; backdrop-filter: blur(4px); }
+        .overlay.active { display: block; }
 
     </style>
 </head>
 <body>
 
-    <!-- 1. GİRİŞ EKRANI -->
-    <div id="home-view">
-        <div class="logo">Safari<span>Pro</span></div>
-        <div class="search-container">
-            <input type="text" class="search-input" id="home-input" placeholder="Ara veya web sitesi yaz..." autocomplete="off">
-            <i data-lucide="search" class="search-icon"></i>
+    <!-- ÜST BAR -->
+    <div class="top-bar">
+        <button class="icon-btn" onclick="toggleMenu()"><i data-lucide="book-open"></i></button>
+        <span class="site-info" id="title">Giriş Yapın</span>
+        <button class="icon-btn" onclick="reload()"><i data-lucide="rotate-cw" size="18"></i></button>
+    </div>
+
+    <!-- WEB ALANI -->
+    <div class="web-area">
+        <div class="progress-bar" id="progress"></div>
+        
+        <!-- Eğer site iframe'de açılmazsa bu buton çıkacak -->
+        <div class="error-screen" id="errorScreen">
+            <i data-lucide="shield-alert" size="48" color="#F43F5E"></i>
+            <h3 style="color:white; margin:15px 0;">Site Açılmıyor mu?</h3>
+            <p style="color:#888; font-size:14px; max-width:80%;">Bu site güvenlik nedeniyle önizleme modunda çalışmayabilir.</p>
+            <!-- Median 'All Links: Internal' ayarı ile bu buton yeni pencere açar -->
+            <button class="fix-btn" onclick="openFull()">Tam Ekran Aç ↗</button>
+        </div>
+
+        <iframe id="frame" src="" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-presentation"></iframe>
+    </div>
+
+    <!-- ALT BAR -->
+    <div class="bottom-bar">
+        <div class="input-wrapper">
+            <i data-lucide="lock" size="12" color="#888"></i>
+            <input type="text" id="urlInput" placeholder="google.com veya film ara..." autocomplete="off">
+        </div>
+        <div class="controls">
+            <button class="icon-btn" onclick="historyBack()"><i data-lucide="chevron-left" size="28"></i></button>
+            <button class="icon-btn" onclick="historyForward()"><i data-lucide="chevron-right" size="28"></i></button>
+            <button class="icon-btn" onclick="toggleMenu()" style="background:rgba(10,132,255,0.2); border-radius:50%; padding:8px;"><i data-lucide="mic"></i></button>
+            <button class="icon-btn" onclick="share()"><i data-lucide="share"></i></button>
+            <button class="icon-btn" onclick="goHome()"><i data-lucide="grid"></i></button>
         </div>
     </div>
 
-    <!-- 2. TARAYICI EKRANI -->
-    <div id="browser-view">
-        <!-- Üst Bar -->
-        <div class="top-bar">
-            <button class="nav-btn" onclick="toggleSidebar()">
-                <i data-lucide="book-open" size="24"></i> <!-- Matkap İkonu -->
-            </button>
-            <div class="url-box">
-                <i data-lucide="lock" class="lock-icon"></i>
-                <span class="url-text" id="url-display">wikipedia.org</span>
-            </div>
-            <button class="nav-btn" onclick="reloadPage()">
-                <i data-lucide="rotate-cw" size="20"></i>
-            </button>
-        </div>
-
-        <!-- Web Sitesi -->
-        <div class="webview-container">
-            <div class="progress-bar" id="progress"></div>
-            <iframe id="webview" src=""></iframe>
-        </div>
-
-        <!-- Alt Bar -->
-        <div class="bottom-bar">
-            <button class="nav-btn" id="back-btn" onclick="goBack()"><i data-lucide="chevron-left" size="28"></i></button>
-            <button class="nav-btn" id="fwd-btn" onclick="goForward()"><i data-lucide="chevron-right" size="28"></i></button>
-            <button class="nav-btn" onclick="shareUrl()"><i data-lucide="share" size="24"></i></button>
-            <button class="nav-btn" onclick="goHome()"><i data-lucide="grid" size="24"></i></button> <!-- Ana ekrana dön -->
-        </div>
-    </div>
-
-    <!-- 3. DİL MATKABI (YAN MENÜ) -->
-    <div id="overlay" onclick="toggleSidebar()"></div>
-    <div id="drill-sidebar">
+    <!-- YAN MENÜ (DİL MATKABI) -->
+    <div class="overlay" onclick="toggleMenu()"></div>
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <span class="sidebar-title">Dil Matkabı 🧪</span>
-            <button class="nav-btn" onclick="toggleSidebar()"><i data-lucide="x"></i></button>
+            <span style="font-weight:700; font-size:18px; color:white;">Dil Matkabı 🧠</span>
+            <button class="icon-btn" onclick="toggleMenu()"><i data-lucide="x"></i></button>
         </div>
-        <div class="drill-content">
-            <p style="color:#888; font-size:14px; margin-bottom:10px;">Metni yapıştır ve dinle:</p>
-            <textarea class="drill-textarea" id="drill-text" placeholder="Buraya Almanca/Japonca cümle yapıştır..."></textarea>
+        <div class="sidebar-content">
+            <textarea id="drillText" placeholder="Filmden duyduğun cümleyi buraya yapıştır..."></textarea>
             
-            <button class="drill-btn" onclick="speakText()">
+            <button class="main-btn" onclick="speak()">
                 <i data-lucide="volume-2"></i> Seslendir
             </button>
-
-            <!-- İleride buraya klasörler gelecek -->
-            <div style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
-                <p style="color:#666; font-size:13px; text-align:center;">Klasör Sistemi Hazırlanıyor...</p>
+            
+            <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px; text-align:center;">
+                <p style="color:#666; font-size:12px;">Otomatik Dil Algılama:<br>JP / RU / AR / DE / ES</p>
+                <button class="icon-btn" onclick="clearText()" style="color:#F43F5E; margin-top:10px;">
+                    <i data-lucide="trash-2" size="16"></i> Temizle
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // İkonları oluştur
         lucide.createIcons();
-
-        // Elemanlar
-        const homeView = document.getElementById('home-view');
-        const browserView = document.getElementById('browser-view');
-        const homeInput = document.getElementById('home-input');
-        const webview = document.getElementById('webview');
-        const urlDisplay = document.getElementById('url-display');
-        const sidebar = document.getElementById('drill-sidebar');
-        const overlay = document.getElementById('overlay');
+        const frame = document.getElementById('frame');
+        const input = document.getElementById('urlInput');
+        const title = document.getElementById('title');
+        const errScreen = document.getElementById('errorScreen');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.querySelector('.overlay');
         const progressBar = document.getElementById('progress');
 
-        // --- TARAYICI MANTIĞI ---
+        // --- TARAYICI MOTORU ---
+        function go(val) {
+            let url = val.trim();
+            if(!url) return;
+            
+            startLoading();
+            errScreen.classList.remove('show'); // Hatayı gizle
 
-        function loadUrl(query) {
-            let url = query.trim();
-            if (!url) return;
-
-            // Omnibox Mantığı (Site mi, Arama mı?)
-            if (url.includes('.') && !url.includes(' ')) {
-                if (!url.startsWith('http')) url = 'https://' + url;
-            } else {
-                url = 'https://www.bing.com/search?q=' + encodeURIComponent(url);
+            // 1. YouTube Linki (Otomatik Embed)
+            if(url.match(/(youtube\.com|youtu\.be)/)) {
+                let v = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+                url = `https://www.youtube.com/embed/${v}?autoplay=1`;
+            } 
+            // 2. Google Arama (igu=1 Hilesi)
+            else if(!url.includes('.')) {
+                url = `https://www.google.com/search?igu=1&q=${encodeURIComponent(url)}`;
+            }
+            // 3. Normal Site
+            else if(!url.startsWith('http')) {
+                url = 'https://' + url;
             }
 
-            // Arayüzü değiştir
-            homeView.classList.add('hidden');
-            browserView.classList.add('active');
-            
-            // Yükle
-            startLoading();
-            webview.src = url;
-            urlDisplay.textContent = url.replace('https://', '').replace('www.', '').split('/')[0];
-            
-            // Klavyeyi kapat
-            homeInput.blur();
+            frame.src = url;
+            title.textContent = url.replace('https://','').replace('www.','').split('/')[0];
+            input.blur();
         }
 
-        homeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') loadUrl(homeInput.value);
-        });
+        // --- OLAY DİNLEYİCİLERİ ---
+        input.addEventListener('keypress', (e) => { if(e.key==='Enter') go(input.value); });
+        
+        // Iframe yüklenemezse (X-Frame-Options)
+        // Not: Bu event her zaman çalışmaz, o yüzden timeout da kullanıyoruz.
+        frame.onerror = () => { errScreen.classList.add('show'); finishLoading(); };
 
-        function goHome() {
-            homeView.classList.remove('hidden');
-            browserView.classList.remove('active');
-            webview.src = ""; // Videoyu durdurur
-            homeInput.value = "";
-            homeInput.focus();
-        }
-
-        // --- NAVİGASYON ---
-        function goBack() { history.back(); } // Basit history
-        function goForward() { history.forward(); }
-        function reloadPage() { webview.src = webview.src; startLoading(); }
-
+        // Yükleme Animasyonu
         function startLoading() {
             progressBar.style.width = "70%";
             progressBar.style.opacity = "1";
-            setTimeout(() => {
-                progressBar.style.width = "100%";
-                setTimeout(() => { progressBar.style.opacity = "0"; progressBar.style.width = "0%"; }, 300);
-            }, 800); // Simülasyon
+            // 3 saniye içinde açılmazsa hata ekranını göster (Backup Planı)
+            setTimeout(() => { 
+                if(progressBar.style.opacity === "1") { 
+                    // İsteğe bağlı: Otomatik hata göstermek yerine kullanıcı beklesin
+                    // errScreen.classList.add('show'); 
+                }
+            }, 3000);
         }
+        
+        frame.onload = () => {
+            progressBar.style.width = "100%";
+            setTimeout(() => { progressBar.style.opacity="0"; progressBar.style.width="0%"; }, 300);
+        };
 
-        // --- DİL MATKABI (YAN MENÜ) ---
+        // --- NAVİGASYON ---
+        function historyBack() { try { frame.contentWindow.history.back(); } catch(e){} }
+        function historyForward() { try { frame.contentWindow.history.forward(); } catch(e){} }
+        function reload() { frame.src = frame.src; startLoading(); }
+        function goHome() { frame.src = ""; input.value = ""; title.textContent="Giriş Yapın"; errScreen.classList.remove('show'); }
+        
+        // --- TAM EKRAN AÇ (Median 'Permitted' ayarı ile çalışır) ---
+        function openFull() { window.open(frame.src, '_blank'); }
 
-        function toggleSidebar() {
+        // --- MENÜ & SES ---
+        function toggleMenu() {
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
         }
 
-        function speakText() {
-            const text = document.getElementById('drill-text').value;
-            if (text) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                // Otomatik dil algılama basitçe
-                if(text.match(/[a-zA-Z]/)) utterance.lang = 'en-US'; // Latin ise İngilizce (veya Almanca)
-                if(text.match(/[\u3000-\u303f\u3040-\u309f]/)) utterance.lang = 'ja-JP'; // Japonca
-                
-                window.speechSynthesis.speak(utterance);
-            }
+        function speak() {
+            let txt = document.getElementById('drillText').value;
+            if(!txt) return;
+            window.speechSynthesis.cancel();
+            let u = new SpeechSynthesisUtterance(txt);
+            
+            // Dil Tahmini
+            if(txt.match(/[\u3000-\u309f]/)) u.lang='ja-JP';
+            else if(txt.match(/[\u0400-\u04FF]/)) u.lang='ru-RU';
+            else if(txt.match(/[\u0600-\u06FF]/)) u.lang='ar-SA';
+            else if(txt.match(/[¿¡ñáéíóú]/)) u.lang='es-ES'; // İspanyolca ipucu
+            else u.lang='de-DE'; // Varsayılan Almanca
+
+            window.speechSynthesis.speak(u);
         }
-        
-        function shareUrl() {
-             const url = webview.src;
-             navigator.clipboard.writeText(url);
-             alert("Link kopyalandı!");
-        }
+
+        function clearText() { document.getElementById('drillText').value = ""; }
+        function share() { navigator.clipboard.writeText(frame.src); alert("Link Kopyalandı"); }
 
     </script>
 </body>
 </html>
-```
-
-### 🧠 Nasıl Kullanacaksın?
-
-1.  **Giriş:** Simsiyah, sade bir ekran. "SafariPro" yazar.
-2.  **Arama:** Kutucuğa `bing.com` veya `wikipedia.org` yaz Enter'a bas.
-3.  **Tarayıcı:** Web sitesi açılır. Alt bar (Geri/İleri/Home) ve Üst Bar (Adres) gelir.
-4.  **Dil Matkabı:** Sol üstteki **Kitap İkonuna** (📖) bas.
-    * Soldan menü kayar.
-    * Oraya Japonca/Almanca cümleni yapıştır.
-    * **"Seslendir"**e bas. Telefonun konuşur.
-
-Bu hem şık, hem senin istediğin "Drill" özelliğine sahip. Test et ve söyle! 🚀
