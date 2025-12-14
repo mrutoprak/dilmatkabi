@@ -3,621 +3,676 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="referrer" content="no-referrer">
-    <title>Dil Matkabı Pro v11</title>
+    <title>Dil Matkabı Pro v16.1</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* === MOBİL ODAKLI TASARIM SİSTEMİ === */
         :root {
-            --bg-base: #000000;
-            --glass-sidebar: rgba(18, 18, 18, 0.98);
-            --glass-modal: #1C1C1E;
-            --glass-card: rgba(28, 28, 30, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg-dark: #000000;
+            --panel-bg: #121212;
+            --surface-2: #1C1C1E;
+            --border: #333333;
             --accent: #0A84FF;
-            --accent-dim: rgba(10, 132, 255, 0.2);
-            --text-primary: #FFFFFF;
+            --accent-dim: rgba(10, 132, 255, 0.15);
+            --text: #ffffff;
             --text-sec: #98989D;
             --danger: #FF453A;
-            --safe-top: env(safe-area-inset-top, 20px);
+            --success: #32D74B;
+            --radius-M: 12px;
             --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --safe-top: env(safe-area-inset-top, 20px);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body { 
-            font-family: 'Inter', -apple-system, sans-serif; 
-            background: var(--bg-base); color: var(--text-primary); 
-            height: 100vh; width: 100vw; overflow: hidden; 
-            -webkit-font-smoothing: antialiased; overscroll-behavior: none;
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-dark); color: var(--text); 
+            height: 100vh; overflow: hidden; 
+            display: flex; flex-direction: column;
         }
 
-        /* === 1. GİRİŞ EKRANI === */
-        #home-screen {
-            position: absolute; inset: 0;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #000; z-index: 50; transition: opacity 0.3s ease; padding: 20px;
+        /* === TOAST === */
+        #toast-container {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 9999; width: 90%; max-width: 300px; pointer-events: none;
         }
-        #home-screen.hidden { opacity: 0; pointer-events: none; }
-
-        .logo { font-size: 32px; font-weight: 800; letter-spacing: -1px; margin-bottom: 30px; text-align: center; }
-        .logo span { color: var(--accent); }
-        .logo-sub { font-size: 13px; color: var(--text-sec); font-weight: 400; display: block; margin-top: 4px; opacity: 0.8; }
-
-        .input-glass {
-            width: 100%; max-width: 400px; height: 56px;
-            background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border);
-            border-radius: 28px; display: flex; align-items: center; padding: 0 6px 0 20px;
-            margin-bottom: 30px;
+        .toast {
+            background: #222; border: 1px solid var(--border);
+            color: white; padding: 10px 15px; border-radius: 8px;
+            font-size: 13px; margin-bottom: 5px; text-align: center;
+            opacity: 0; transition: opacity 0.2s;
         }
-        .url-input { flex: 1; height: 100%; background: transparent; border: none; font-size: 16px; color: white; }
-        .go-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .toast.show { opacity: 1; }
 
-        .quick-actions { display: flex; gap: 40px; }
-        .quick-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; background: none; border: none; color: var(--text-sec); cursor: pointer; }
-        .q-icon { font-size: 28px; background: rgba(255,255,255,0.06); width: 68px; height: 68px; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); }
-
-        /* === 2. İÇERİK EKRANI === */
-        #content-screen { position: absolute; inset: 0; opacity: 0; pointer-events: none; transition: opacity 0.4s; background: #000; }
-        #content-screen.active { opacity: 1; pointer-events: auto; }
-        .webview-wrapper { position: absolute; inset: 0; z-index: 1; padding-top: var(--safe-top); }
+        /* === ANA SAHNE & TARAYICI === */
+        #main-stage { position: absolute; inset: 0; z-index: 1; background: #000; }
         iframe { width: 100%; height: 100%; border: none; }
-
-        .floating-header {
-            position: absolute; top: var(--safe-top); left: 10px; right: 10px; height: 50px; padding: 0 10px; margin-top: 10px;
-            background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border); border-radius: 25px;
-            display: flex; align-items: center; justify-content: space-between; z-index: 20;
-        }
-        .float-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; color: #fff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .float-btn.ghost-toggle-btn.active { color: var(--accent); background: var(--accent-dim); }
-
-        .fab-add {
-            position: absolute; bottom: calc(var(--safe-bottom) + 20px); right: 20px;
-            width: 56px; height: 56px; border-radius: 50%;
-            background: var(--accent); color: white; border: none; font-size: 30px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 20; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        .iframe-placeholder {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; color: var(--text-sec); z-index: -1;
         }
 
-        /* === 3. YAN MENÜ === */
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90; display: none; backdrop-filter: blur(3px); }
-        #overlay.active { display: block; }
-        #drill-sidebar {
-            position: fixed; top: 0; left: 0; bottom: 0; width: 85%; max-width: 340px;
-            background: var(--glass-sidebar); border-right: 1px solid var(--glass-border);
-            z-index: 100; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-            display: flex; flex-direction: column; padding-top: var(--safe-top); padding-bottom: var(--safe-bottom);
+        /* === INTRO === */
+        #intro-layer {
+            position: absolute; inset: 0; background: #000; z-index: 50;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.2s;
         }
-        #drill-sidebar.open { transform: translateX(0); }
+        #intro-layer.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .search-container { position: relative; width: 90%; max-width: 400px; }
+        .search-box {
+            background: #222; border: 1px solid var(--border);
+            padding: 15px; border-radius: 12px; width: 100%;
+            color: white; font-size: 16px;
+        }
+        .search-btn {
+            position: absolute; right: 0; top: 0; bottom: 0; width: 50px;
+            background: transparent; border: none; color: white; font-size: 20px;
+        }
 
-        .sidebar-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+        /* === MAGIC BUTTON (M) === */
+        #magic-btn {
+            position: fixed; bottom: calc(var(--safe-bottom) + 20px); right: 20px;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--accent); color: white; border: none;
+            font-size: 24px; font-weight: 800; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: transform 0.15s;
+        }
+        #magic-btn:active { transform: scale(0.95); }
 
-        .group-item { margin-bottom: 20px; }
-        .group-header { font-size: 13px; font-weight: 700; color: var(--text-sec); letter-spacing: 0.5px; padding: 8px 5px; cursor: pointer; display: flex; justify-content: space-between; text-transform: uppercase; }
-        .group-children { display: none; }
+        /* === ACTION SHEET (PANEL) === */
+        #action-sheet {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--panel-bg); 
+            border-top: 1px solid var(--border);
+            padding: 15px 15px calc(var(--safe-bottom) + 15px) 15px;
+            z-index: 95; 
+            transform: translateY(110%); 
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #action-sheet.open { transform: translateY(0); }
+        .sheet-handle { width: 40px; height: 4px; background: #333; margin: 0 auto 15px auto; border-radius: 2px; }
+
+        /* Player Widget */
+        .player-widget {
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 12px; padding: 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .pw-info { flex: 1; overflow: hidden; padding-right: 10px; }
+        .pw-status { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+        .pw-text { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:#eee; }
+        .pw-play { 
+            width: 44px; height: 44px; flex-shrink: 0;
+            border-radius: 50%; background: var(--accent); 
+            border:none; color: white; font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .btn-main {
+            width: 100%; padding: 14px; background: #222; 
+            border: 1px solid var(--border); border-radius: 10px;
+            color: white; font-weight: 600; font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* === FULLSCREEN OVERLAY (KÜTÜPHANE) === */
+        .fullscreen-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 110;
+            transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex; flex-direction: column;
+        }
+        .fullscreen-overlay.active { transform: translateY(0); }
+        
+        .overlay-header { 
+            padding: 15px; padding-top: calc(var(--safe-top) + 15px);
+            display: flex; align-items: center; justify-content: space-between; 
+            border-bottom: 1px solid var(--border); background: var(--panel-bg);
+        }
+        .overlay-title { font-size: 18px; font-weight: 700; }
+        .close-btn { font-size: 24px; padding: 0 10px; cursor: pointer; color: #888; }
+        .overlay-content { flex: 1; overflow-y: auto; padding: 15px; }
+
+        /* === KÜTÜPHANE STİLLERİ === */
+        .group-item {
+            margin-bottom: 15px; border: 1px solid var(--border); border-radius: var(--radius-M);
+            background: #0a0a0a; overflow: hidden;
+        }
+        .group-header {
+            padding: 12px 15px; background: rgba(255,255,255,0.03);
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 600; font-size: 15px; cursor: pointer;
+        }
+        .group-lang-tag { 
+            font-size: 10px; background: var(--accent); color: white; 
+            padding: 2px 6px; border-radius: 4px; margin-right: 8px; 
+        }
+
+        .group-children { display: none; padding: 5px; border-top: 1px solid var(--border); }
         .group-item.expanded .group-children { display: block; }
 
-        .subfolder-item { background: rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
-        .subfolder-header { padding: 16px; font-size: 15px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .subfolder-content { display: none; padding: 0 16px 16px 16px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .subfolder-item {
+            margin: 5px 0; background: var(--surface-2); border-radius: 8px;
+            overflow: hidden;
+        }
+        .subfolder-header {
+            padding: 10px 12px; font-size: 14px; display: flex; justify-content: space-between;
+            align-items: center; cursor: pointer; color: #ddd;
+        }
+        .subfolder-header:hover { background: rgba(255,255,255,0.05); }
+
+        .subfolder-content { display: none; background: #000; border-top: 1px solid #333; }
         .subfolder-item.expanded .subfolder-content { display: block; }
 
-        .sentence-row { padding: 12px 0; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
-        .sentence-row.active { color: var(--accent); font-weight: 500; }
-        .sent-actions { display: flex; gap: 15px; }
-        .mini-btn-text { font-size: 12px; color: var(--text-sec); background: none; border: none; padding: 5px; }
-
-        .sidebar-footer { padding: 15px; border-top: 1px solid var(--glass-border); }
-        .btn-ios { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; background: rgba(255,255,255,0.1); color: white; }
-        .btn-primary { background: var(--accent); }
-
-        /* === 4. MODALLAR === */
-        .modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(5px); }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-box { width: 85%; max-width: 320px; background: #1C1C1E; border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; text-align: center; max-height: 80vh; overflow-y: auto; }
-        .input-ios { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid #333; padding: 14px; border-radius: 10px; color: white; font-size: 16px; margin-bottom: 12px; appearance: none; }
-
-        /* === 5. HAYALET KART === */
-        body.ghost-mode #home-screen, body.ghost-mode .floating-header, body.ghost-mode .fab-add, body.ghost-mode .sidebar-header, body.ghost-mode .group-item { display: none !important; }
-        body.ghost-mode { background: transparent !important; }
-        body.ghost-mode iframe { opacity: 0.1; pointer-events: none; }
-        #ghost-overlay { display: none; position: absolute; inset: 0; z-index: 100; pointer-events: none; }
-        body.ghost-mode #ghost-overlay { display: block; }
-        
-        .ghost-card {
-            position: absolute; left: 20px; top: 100px; width: 220px;
-            background: rgba(20, 20, 20, 0.9); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
-            padding: 12px; pointer-events: auto; touch-action: none; box-shadow: 0 5px 20px rgba(0,0,0,0.5); transform: translate3d(0,0,0);
+        .sentence-row {
+            padding: 10px 12px; border-bottom: 1px solid #222; font-size: 13px;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background 0.2s;
         }
-        .ghost-header { display: flex; justify-content: space-between; margin-bottom: 5px; opacity: 0.7; }
-        .ghost-status { font-size: 10px; font-weight: bold; color: var(--accent); }
-        .ghost-text { font-size: 13px; color: white; margin-bottom: 10px; min-height: 18px; line-height: 1.3; }
-        .progress-track { width: 100%; height: 3px; background: rgba(255,255,255,0.1); margin-bottom: 10px; border-radius: 2px; }
-        .progress-bar { height: 100%; background: var(--accent); width: 0%; border-radius: 2px; }
-
-        .mini-btn { padding: 8px 12px; border-radius: 8px; border:none; font-size: 12px; cursor: pointer; font-weight: 600; }
-        .btn-blue { background: var(--accent); color: white; }
-        .btn-dark { background: rgba(255,255,255,0.15); color: #ddd; }
+        .sent-text-group { flex: 1; }
+        .sent-tr { color: #fff; margin-bottom: 2px; }
+        .sent-target { color: var(--accent); font-family: monospace; }
         
-        input[type=range] { width: 100%; height: 20px; -webkit-appearance: none; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%; background: #fff; margin-top: -8px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #333; border-radius: 2px; }
+        .sent-actions { display: flex; gap: 8px; margin-left: 10px; }
+        
+        .tree-btn { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; }
+        .tree-btn-play { background: var(--accent); color: white; width: 100%; margin: 5px 0; padding: 10px; font-weight: 600; border-radius: 8px; border:none; cursor:pointer;}
+        .icon-only-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 16px; padding: 5px; }
+        .icon-only-btn:hover { color: #fff; }
+
+        /* === MODALLER === */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            z-index: 200; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.2s;
+        }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            width: 90%; max-width: 340px; background: var(--surface-2);
+            border: 1px solid var(--border); border-radius: 20px; padding: 20px;
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal h3 { margin-bottom: 15px; font-size: 18px; text-align: center; font-weight: 700; }
+        
+        .input-field {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            padding: 14px; color: white; border-radius: 10px; margin-bottom: 12px; font-size: 15px;
+        }
+        .input-field:focus { border-color: var(--accent); }
+        select.input-field { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-full { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 15px;}
+        .btn-blue { background: var(--accent); color: white; }
+        .btn-gray { background: rgba(255,255,255,0.1); color: white; }
+
+        /* Slider */
+        .slider-container { margin: 15px 0; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 8px; }
+        input[type=range] { width: 100%; accent-color: var(--accent); height: 4px; background: #333; border-radius: 2px; }
 
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <!-- GİRİŞ -->
-    <div id="home-screen">
-        <div class="logo">Dil<span>Matkabı</span><span class="logo-sub">Pro v11 Stable</span></div>
-        <div class="input-glass">
-            <input type="text" class="url-input" id="search-input" placeholder="Web'de ara veya Film URL'si..." autocomplete="off">
-            <button class="go-btn" onclick="startBrowsing()">➜</button>
-        </div>
-        <div class="quick-actions">
-            <button class="quick-btn" onclick="openSidebar()">
-                <div class="q-icon">📂</div><span>Kütüphane</span>
-            </button>
-            <button class="quick-btn" onclick="openSettings()">
-                <div class="q-icon">⚙️</div><span>Ayarlar</span>
-            </button>
+    <div id="intro-layer">
+        <div style="font-size:36px; font-weight:800; margin-bottom:20px;">Matkap<span style="color:var(--accent)">.</span></div>
+        <div class="search-container">
+            <input type="text" class="search-box" id="url-input" 
+                   placeholder="Web sitesi veya arama..." 
+                   autocomplete="off"
+                   onkeypress="if(event.key==='Enter') loadUrl(this.value)">
+            <button class="search-btn" onclick="loadUrl(document.getElementById('url-input').value)">→</button>
         </div>
     </div>
 
-    <!-- İÇERİK -->
-    <div id="content-screen" class="app-ui-layer">
-        <div class="webview-wrapper">
-            <iframe id="webview" src="" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="no-referrer"></iframe>
+    <!-- ANA SAHNE -->
+    <div id="main-stage">
+        <div class="iframe-placeholder">
+            <p>Site Yüklenmedi</p>
         </div>
-        <div class="floating-header">
-            <button class="float-btn" onclick="goHome()">🏠</button>
-            <button class="float-btn" onclick="openSidebar()">📚</button>
-            <button class="float-btn ghost-toggle-btn" onclick="toggleGhostMode()">👻</button>
-            <button class="float-btn" onclick="reloadWeb()">↻</button>
-        </div>
-        <button class="fab-add" onclick="addFromBrowser()">+</button>
+        <iframe id="webview" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
     </div>
 
-    <!-- HAYALET KART -->
-    <div id="ghost-overlay">
-        <div class="ghost-card" id="draggable-card">
-            <div class="ghost-header" style="height: 20px;">
-                <span class="ghost-status" id="ghost-status">HAZIR</span><span style="font-size:16px;">⠿</span>
+    <!-- M BUTONU -->
+    <button id="magic-btn" onclick="toggleSheet()">M</button>
+
+    <!-- PANEL (ACTION SHEET) -->
+    <div id="action-sheet">
+        <div class="sheet-handle" onclick="toggleSheet()"></div>
+        
+        <!-- Oynatıcı Widget -->
+        <div class="player-widget">
+            <div class="pw-info">
+                <div class="pw-status" id="pw-status">HAZIR</div>
+                <div class="pw-text" id="pw-text">---</div>
             </div>
-            <div class="ghost-text" id="ghost-text">Başlatılmadı</div>
-            <div class="progress-track"><div class="progress-bar" id="ghost-progress"></div></div>
-            <div style="display:flex; gap:8px;">
-                <button class="mini-btn btn-blue" style="flex:1" id="ghost-play-btn" onclick="togglePlay()">▶ Oynat</button>
-                <button class="mini-btn btn-dark" onclick="toggleGhostMode()">Kapat</button>
-            </div>
+            <button class="pw-play" id="main-play-btn" onclick="togglePlay()">▶</button>
+        </div>
+
+        <button class="btn-main" onclick="openLibrary()">📚 Kütüphaneyi Aç</button>
+
+        <div class="slider-container">
+            <div class="slider-label"><span>Okuma Hızı</span><span id="speed-val">1.0x</span></div>
+            <input type="range" min="0.5" max="2" step="0.1" value="1" oninput="updateSpeed(this.value)">
+        </div>
+        
+        <div class="btn-row">
+            <button class="btn-full btn-gray" onclick="downloadData()">Yedekle</button>
+            <button class="btn-full btn-gray" onclick="document.getElementById('file-up').click()">Yükle</button>
+            <input type="file" id="file-up" style="display:none" onchange="uploadData(this)">
         </div>
     </div>
 
-    <!-- SIDEBAR -->
-    <div id="overlay" onclick="closeAll()"></div>
-    <div id="drill-sidebar">
-        <div class="sidebar-header">
-            <span style="color:white; font-weight:bold; font-size:20px;">Kütüphane</span>
-            <button class="float-btn" style="width:30px; height:30px; background:rgba(255,255,255,0.1);" onclick="closeAll()">✕</button>
+    <!-- KÜTÜPHANE OVERLAY (AĞAÇ YAPISI) -->
+    <div id="library-overlay" class="fullscreen-overlay">
+        <div class="overlay-header">
+            <span class="overlay-title">Kütüphane</span>
+            <span class="close-btn" onclick="closeLibrary()">✕</span>
         </div>
-        <div class="sidebar-content" id="library-content"></div>
-        <div class="sidebar-footer">
-            <button class="btn-ios" onclick="showAddGroupModal()">+ Yeni Dil</button>
-            <button class="btn-ios btn-primary" onclick="openSettings()">Kontrol Merkezi</button>
+        <div class="overlay-content" id="library-content">
+            <!-- JS ile doldurulacak -->
+        </div>
+        <div style="padding:15px; border-top:1px solid var(--border); background:var(--panel-bg);">
+            <button class="btn-full btn-gray" onclick="showAddGroupModal()">+ Yeni Dil Grubu</button>
         </div>
     </div>
 
-    <!-- AYARLAR MODALI -->
-    <div class="modal" id="modal-settings">
+    <!-- --- MODALLAR --- -->
+
+    <!-- GRUP EKLEME -->
+    <div class="modal" id="modal-add-group">
         <div class="modal-box">
-            <h3 style="color:white; margin-bottom:20px; font-size:18px;">Kontrol Merkezi</h3>
-            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px;">
-                <div id="set-status" style="font-size:11px; color:var(--accent); font-weight:bold; margin-bottom:5px;">HAZIR</div>
-                <div id="set-text" style="color:white; font-size:15px; margin-bottom:10px;">---</div>
-                <div class="progress-track"><div class="progress-bar" id="set-progress"></div></div>
-                <button class="btn-ios btn-primary" id="set-play-btn" onclick="togglePlay()">▶ Oynat</button>
+            <h3>Yeni Dil Grubu</h3>
+            <input type="text" id="inp-group-name" class="input-field" placeholder="Grup Adı (Örn: Japonca)">
+            <select id="inp-group-lang" class="input-field">
+                <option value="ja-JP">Japonca (日本語)</option>
+                <option value="es-ES">İspanyolca (Español)</option>
+                <option value="ar-SA">Arapça (العربية)</option>
+                <option value="ru-RU">Rusça (Русский)</option>
+                <option value="de-DE">Almanca (Deutsch)</option>
+                <option value="en-US">İngilizce (English)</option>
+            </select>
+            <div class="btn-row">
+                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
+                <button class="btn-full btn-blue" onclick="confirmAddGroup()">Oluştur</button>
             </div>
-            <div style="text-align:left; margin-bottom:20px;">
-                <div style="display:flex; justify-content:space-between; font-size:13px; color:#aaa; margin-bottom:10px;">
-                    <span>Düşünme Süresi</span><span id="lbl-delay" style="color:white">2.5s</span>
-                </div>
-                <input type="range" min="0" max="10" step="0.5" value="2.5" id="rng-delay" style="width:100%" oninput="updateSettingsUI()">
-            </div>
-            <div style="display:flex; gap:10px;">
-                 <button class="btn-ios" onclick="downloadData()">Yedekle</button>
-                 <button class="btn-ios" onclick="document.getElementById('file-upload').click()">Yükle</button>
-                 <input type="file" id="file-upload" style="display:none" onchange="uploadData(this)">
-            </div>
-            <button class="btn-ios" style="background:transparent; color:#666; margin-top:10px;" onclick="saveSettings()">Kapat</button>
         </div>
     </div>
 
-    <div class="modal" id="modal-generic">
-        <div class="modal-box"><h3 id="gen-title" style="color:white; margin-bottom:20px;">...</h3><div id="gen-content"></div></div>
+    <!-- ALT KLASÖR EKLEME -->
+    <div class="modal" id="modal-add-sub">
+        <div class="modal-box">
+            <h3>Yeni Konu Klasörü</h3>
+            <div style="font-size:12px; color:#888; margin-bottom:10px; text-align:center;">Dil: <span id="lbl-parent-lang" style="color:var(--accent)"></span></div>
+            <input type="text" id="inp-sub-name" class="input-field" placeholder="Konu Adı (Örn: Fiiller)">
+            <div class="btn-row">
+                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
+                <button class="btn-full btn-blue" onclick="confirmAddSub()">Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÜMLE EKLEME / DÜZENLEME -->
+    <div class="modal" id="modal-sent">
+        <div class="modal-box">
+            <h3 id="sent-modal-title">Cümle Ekle</h3>
+            <textarea id="inp-sent-tr" class="input-field" rows="3" placeholder="Türkçe Cümle"></textarea>
+            <textarea id="inp-sent-target" class="input-field" rows="3" placeholder="Hedef Dildeki Karşılığı"></textarea>
+            <div class="btn-row">
+                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
+                <button class="btn-full btn-blue" onclick="confirmSent()">Kaydet</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- GÜVENLİ ID ÜRETİCİ (FIX 1) ---
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        }
-
-        // --- GLOBAL STATE ---
-        let groups = JSON.parse(localStorage.getItem('dm_v7_data')) || [];
-        let settings = JSON.parse(localStorage.getItem('dm_v7_settings')) || { delay: 2.5 };
-        let activeGid=null, activeSid=null, editIdx=null;
-        let isGhost=false, isPlaying=false;
-        let playlist=[], pIndex=0, wakeLock=null, playTimeout, progressInterval;
-        let pLang='en-US';
+        // --- DATA & STATE ---
+        let groups = JSON.parse(localStorage.getItem('dm_v16_data')) || [];
         
-        // --- SES NESNESİ (GARBAGE COLLECTION FIX 2) ---
-        // Bu değişken global olarak saklanmalı ki tarayıcı silmesin
-        let currentUtterance = null;
+        let activeGroupId = null;
+        let activeSubId = null;
+        let editSentIndex = null;
 
-        // INIT
-        renderLibrary();
-        updateSettingsUI();
-        initDrag();
+        let isPlaying = false;
+        let playlist = [];
+        let pIndex = 0;
+        let pLang = 'en-US';
+        let playTimeout;
+        let speed = 1.0;
+        const synth = window.speechSynthesis;
 
-        // --- TARAYICI ---
-        const homeScreen = document.getElementById('home-screen');
-        const contentScreen = document.getElementById('content-screen');
-        const webview = document.getElementById('webview');
-        const searchInput = document.getElementById('search-input');
+        // --- INIT ---
+        window.addEventListener('load', () => {
+            document.body.addEventListener('click', () => { if(!synth.speaking) synth.resume(); }, {once:true});
+            renderLibrary();
+        });
 
-        searchInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') startBrowsing() });
-
-        function startBrowsing() {
-            let q = searchInput.value.trim();
-            if(!q) return;
-            let url = q.includes('.') && !q.includes(' ') ? (q.startsWith('http')?q:'https://'+q) : 'https://www.google.com/search?igu=1&q='+encodeURIComponent(q);
-            homeScreen.classList.add('hidden');
-            contentScreen.classList.add('active');
-            webview.src = url;
+        // --- TOAST ---
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast'; t.innerText = msg;
+            c.appendChild(t);
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 200); }, 2000);
         }
 
-        function goHome() {
-            contentScreen.classList.remove('active');
-            homeScreen.classList.remove('hidden');
-            webview.src = "";
-            stopPlayer();
-            if(isGhost) toggleGhostMode();
-        }
-        function reloadWeb() { webview.src = webview.src; }
-
-        function toggleGhostMode() {
-            isGhost = !isGhost;
-            if(isGhost) {
-                document.body.classList.add('ghost-mode');
-                document.querySelector('.ghost-toggle-btn').classList.add('active');
-            } else {
-                document.body.classList.remove('ghost-mode');
-                document.querySelector('.ghost-toggle-btn').classList.remove('active');
-            }
+        // --- NAV & UI ---
+        function loadUrl(val) {
+            let url = val.trim();
+            if(!url) return;
+            if (!url.startsWith('http') && url.includes('.')) url = 'https://' + url;
+            else if (!url.includes('.')) url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
+            
+            document.getElementById('webview').src = url;
+            document.getElementById('intro-layer').classList.add('hidden');
         }
 
-        // --- LIBRARY ---
-        function openSidebar() { document.getElementById('drill-sidebar').classList.add('open'); document.getElementById('overlay').classList.add('active'); }
-        function closeAll() { document.getElementById('drill-sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); closeModal(); }
+        function toggleSheet() { document.getElementById('action-sheet').classList.toggle('open'); }
         
-        function getFlag(lang) {
-            const map = { 'en-US':'🇺🇸', 'de-DE':'🇩🇪', 'fr-FR':'🇫🇷', 'es-ES':'🇪🇸', 'it-IT':'🇮🇹', 'ru-RU':'🇷🇺', 'ja-JP':'🇯🇵', 'tr-TR':'🇹🇷', 'ar-SA':'🇸🇦' };
-            return map[lang] || '🌐';
+        function openLibrary() {
+            renderLibrary();
+            document.getElementById('library-overlay').classList.add('active');
         }
+        function closeLibrary() { document.getElementById('library-overlay').classList.remove('active'); }
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
 
+        // --- CORE LIBRARY LOGIC ---
         function renderLibrary() {
-            const list = document.getElementById('library-content');
-            list.innerHTML = "";
-            if(!groups.length) list.innerHTML = "<div style='text-align:center; color:#555; margin-top:40px; font-size:14px;'>Henüz dil eklenmedi.<br>Aşağıdan başlayın.</div>";
+            const container = document.getElementById('library-content');
+            container.innerHTML = "";
 
-            groups.forEach(g => {
+            if(groups.length === 0) {
+                container.innerHTML = "<div style='text-align:center; color:#666; margin-top:50px'>Kütüphane boş.<br>Aşağıdan yeni bir dil grubu ekleyin.</div>";
+                return;
+            }
+
+            groups.forEach(group => {
                 const gDiv = document.createElement('div');
-                gDiv.className = 'group-item expanded';
+                gDiv.className = 'group-item';
                 gDiv.innerHTML = `
-                    <div class="group-header" onclick="this.parentNode.classList.toggle('expanded')">
-                        <span>${getFlag(g.lang)} ${g.name}</span>
-                        <span style="font-size:12px; padding:5px" onclick="event.stopPropagation(); delGroup('${g.id}')">✕</span>
+                    <div class="group-header" onclick="toggleExpand(this)">
+                        <div>
+                            <span class="group-lang-tag">${group.lang.split('-')[0].toUpperCase()}</span>
+                            ${group.name}
+                        </div>
+                        <div style="font-size:12px; opacity:0.5">▼</div>
                     </div>
                     <div class="group-children">
-                        <div id="subs-${g.id}"></div>
-                        <button class="btn-ios" style="background:transparent; border:1px dashed #333; color:#888; font-size:13px;" onclick="event.stopPropagation(); showModal('sub', '${g.id}')">+ Klasör</button>
+                        <!-- Alt klasörler buraya -->
                     </div>
                 `;
-                list.appendChild(gDiv);
+                container.appendChild(gDiv);
 
-                const subList = gDiv.querySelector(`#subs-${g.id}`);
-                if(g.subfolders) g.subfolders.forEach(s => {
-                    const sDiv = document.createElement('div');
-                    sDiv.className = 'subfolder-item';
-                    sDiv.innerHTML = `
-                        <div class="subfolder-header" onclick="this.parentNode.classList.toggle('expanded')">
-                            <span>📁 ${s.name} <small style="color:#666; margin-left:5px">(${s.sentences.length})</small></span>
-                        </div>
-                        <div class="subfolder-content">
-                            <div style="display:flex; gap:8px; margin-bottom:15px;">
-                                <button class="mini-btn btn-blue" style="flex:1; font-size:13px; padding:10px;" onclick="startDrill('${g.id}', '${s.id}')">OYNAT</button>
-                                <button class="mini-btn btn-dark" style="padding:10px;" onclick="showModal('sent', '${g.id}', '${s.id}')">+ Ekle</button>
-                                <button class="mini-btn btn-dark" style="color:var(--danger); padding:10px;" onclick="delSub('${g.id}', '${s.id}')">Sil</button>
+                const childrenContainer = gDiv.querySelector('.group-children');
+                
+                const addSubBtn = document.createElement('button');
+                addSubBtn.className = 'tree-btn';
+                addSubBtn.style.width = '100%';
+                addSubBtn.style.marginBottom = '8px';
+                addSubBtn.innerText = "+ Yeni Konu Klasörü";
+                addSubBtn.onclick = (e) => { e.stopPropagation(); showAddSubModal(group.id, group.name); };
+                childrenContainer.appendChild(addSubBtn);
+
+                if(group.subfolders) {
+                    group.subfolders.forEach(sub => {
+                        const sDiv = document.createElement('div');
+                        sDiv.className = 'subfolder-item';
+                        sDiv.innerHTML = `
+                            <div class="subfolder-header" onclick="toggleExpand(this)">
+                                <span>📁 ${sub.name} <small style="color:#666">(${sub.sentences.length})</small></span>
+                                <button class="icon-only-btn" style="color:var(--danger)" onclick="event.stopPropagation(); deleteSub('${group.id}', '${sub.id}')">✕</button>
                             </div>
-                            <div id="sent-list-${s.id}"></div>
-                        </div>
-                    `;
-                    subList.appendChild(sDiv);
-                    
-                    const sentList = sDiv.querySelector(`#sent-list-${s.id}`);
-                    s.sentences.forEach((sent, idx) => {
-                        const row = document.createElement('div');
-                        row.className = 'sentence-row';
-                        row.id = `row-${s.id}-${idx}`;
-                        row.innerHTML = `
-                            <div class="sent-main" onclick="showModal('sent', '${g.id}', '${s.id}', ${idx})">
-                                <div style="color:white; font-size:15px;">${sent.tr}</div>
-                                <div class="sent-tgt">${sent.target}</div>
-                            </div>
-                            <div class="sent-actions">
-                                <button class="mini-btn-text" onclick="delSent('${g.id}', '${s.id}', ${idx})">✕</button>
+                            <div class="subfolder-content">
+                                <div style="padding:10px">
+                                    <button class="tree-btn-play" onclick="startPlaylist('${group.id}', '${sub.id}')">▶ BU KLASÖRÜ BAŞLAT</button>
+                                    <button class="tree-btn" style="width:100%; margin-top:5px; padding:10px;" onclick="showSentModal('${group.id}', '${sub.id}', null)">+ Cümle Ekle</button>
+                                </div>
+                                <div id="list-${sub.id}">
+                                    ${sub.sentences.map((s, idx) => `
+                                        <div class="sentence-row">
+                                            <div class="sent-text-group">
+                                                <div class="sent-tr">${s.tr}</div>
+                                                <div class="sent-target">${s.target}</div>
+                                            </div>
+                                            <div class="sent-actions">
+                                                <button class="icon-only-btn" style="color:var(--accent)" onclick="showSentModal('${group.id}', '${sub.id}', ${idx})">✎</button>
+                                                <button class="icon-only-btn" style="color:var(--danger)" onclick="deleteSent('${group.id}', '${sub.id}', ${idx})">✕</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
                             </div>
                         `;
-                        sentList.appendChild(row);
+                        childrenContainer.appendChild(sDiv);
                     });
-                });
+                }
+                
+                const delGroupBtn = document.createElement('div');
+                delGroupBtn.style.padding = "5px"; delGroupBtn.style.textAlign="center";
+                delGroupBtn.innerHTML = `<button class="tree-btn" style="color:var(--danger); background:transparent" onclick="deleteGroup('${group.id}')">Grubu Sil</button>`;
+                childrenContainer.appendChild(delGroupBtn);
             });
         }
 
-        // MODALS
-        const modal = document.getElementById('modal-generic');
-        const mTitle = document.getElementById('gen-title');
-        const mContent = document.getElementById('gen-content');
+        function toggleExpand(el) { el.parentElement.classList.toggle('expanded'); }
 
-        function showAddGroupModal() { showModal('group'); }
-        function openSettings() { 
-            document.getElementById('modal-settings').classList.add('active'); 
-            updateSettingsUI(); updatePlayerUI();
-        }
-        function closeModal() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
-
-        function showModal(type, gid=null, sid=null, idx=null) {
-            activeGid = gid; activeSid = sid; editIdx = idx;
-            let html = "";
-            if(type === 'group') {
-                mTitle.innerText = "Dil Seçin";
-                html = `
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('en-US', 'İngilizce')">🇺🇸 İngilizce</button>
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('de-DE', 'Almanca')">🇩🇪 Almanca</button>
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('es-ES', 'İspanyolca')">🇪🇸 İspanyolca</button>
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('ru-RU', 'Rusça')">🇷🇺 Rusça</button>
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('ja-JP', 'Japonca')">🇯🇵 Japonca</button>
-                        <button class="mini-btn btn-dark" style="padding:12px" onclick="addLang('ar-SA', 'Arapça')">🇸🇦 Arapça</button>
-                    </div>
-                    <button class="btn-ios" style="margin-top:15px; background:transparent; color:#666;" onclick="closeModal()">İptal</button>
-                `;
-            } else if(type === 'sub') {
-                mTitle.innerText = "Yeni Klasör";
-                html = `<input id="inp-s-name" class="input-ios" placeholder="Örn: A1 Fiiller"><button class="btn-ios btn-primary" onclick="saveSub()">Oluştur</button>`;
-            } else if(type === 'sent') {
-                mTitle.innerText = idx !== null ? "Düzenle" : "Ekle";
-                let v1="", v2="";
-                if(idx !== null) {
-                    const s = groups.find(x=>x.id==gid).subfolders.find(x=>x.id==sid);
-                    v1 = s.sentences[idx].tr; v2 = s.sentences[idx].target;
-                }
-                html = `
-                    <input id="inp-tr" class="input-ios" placeholder="Türkçe" value="${v1}">
-                    <input id="inp-tgt" class="input-ios" placeholder="Hedef Dil" value="${v2}">
-                    <button class="btn-ios btn-primary" onclick="saveSent()">Kaydet</button>
-                `;
-            }
-            mContent.innerHTML = html;
-            modal.classList.add('active');
-        }
-
-        // --- DATA LOGIC (GÜVENLİ ID + LOCALSTORAGE CONTROL FIX 3) ---
-        function addLang(code, name) {
-            groups.push({ id: generateId(), name, lang: code, subfolders: [{id:generateId(), name:"Genel", sentences:[]}] });
-            sync(); closeModal();
-        }
-        function saveSub() {
-            const n = document.getElementById('inp-s-name').value;
-            if(n) { groups.find(x=>x.id==activeGid).subfolders.push({id:generateId(), name:n, sentences:[]}); sync(); closeModal(); }
-        }
-        function saveSent() {
-            const tr = document.getElementById('inp-tr').value;
-            const tgt = document.getElementById('inp-tgt').value;
-            if(tr && tgt) {
-                const s = groups.find(x=>x.id==activeGid).subfolders.find(x=>x.id==activeSid);
-                if(editIdx!==null) s.sentences[editIdx]={tr, target:tgt};
-                else s.sentences.push({tr, target:tgt});
-                sync(); closeModal();
-            }
-        }
-        function delGroup(id) { if(confirm('Silinsin mi?')) { groups=groups.filter(x=>x.id!==id); sync(); } }
-        function delSub(gid, sid) { if(confirm('Silinsin mi?')) { const g=groups.find(x=>x.id==gid); g.subfolders=g.subfolders.filter(x=>x.id!==sid); sync(); } }
-        function delSent(gid, sid, idx) { const s=groups.find(x=>x.id==gid).subfolders.find(x=>x.id==sid); s.sentences.splice(idx,1); sync(); }
-        function addFromBrowser() { if(!groups.length) return alert("Önce Dil Ekleyin"); openSidebar(); }
+        // --- MODAL CONTROLLERS ---
+        function showAddGroupModal() { document.getElementById('modal-add-group').classList.add('active'); }
         
-        function sync() { 
-            try {
-                localStorage.setItem('dm_v7_data', JSON.stringify(groups)); 
-                renderLibrary(); 
-            } catch(e) {
-                alert("Depolama alanı doldu! Lütfen yedekleme yapıp eski verileri temizleyin.");
-            }
+        function showAddSubModal(gid, gname) { 
+            activeGroupId = gid; 
+            document.getElementById('lbl-parent-lang').innerText = gname;
+            document.getElementById('modal-add-sub').classList.add('active'); 
         }
+        
+        function showSentModal(gid, sid, idx) { 
+            activeGroupId = gid; activeSubId = sid; editSentIndex = idx;
+            
+            const trInp = document.getElementById('inp-sent-tr');
+            const targetInp = document.getElementById('inp-sent-target');
+            const title = document.getElementById('sent-modal-title');
 
-        // --- TOUCH DRAG ---
-        function initDrag() {
-            const el = document.getElementById("draggable-card");
-            let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
-
-            el.addEventListener("touchstart", dragStart, {passive: false});
-            el.addEventListener("mousedown", dragStart);
-
-            function dragStart(e) {
-                if (e.type === "touchstart") {
-                    initialX = e.touches[0].clientX - xOffset;
-                    initialY = e.touches[0].clientY - yOffset;
-                } else {
-                    initialX = e.clientX - xOffset;
-                    initialY = e.clientY - yOffset;
-                }
-                if (e.target.closest('.ghost-header')) { isDragging = true; }
-            }
-
-            document.addEventListener("touchend", dragEnd);
-            document.addEventListener("mouseup", dragEnd);
-            document.addEventListener("touchmove", drag, {passive: false});
-            document.addEventListener("mousemove", drag);
-
-            function drag(e) {
-                if (isDragging) {
-                    e.preventDefault();
-                    if (e.type === "touchmove") {
-                        currentX = e.touches[0].clientX - initialX;
-                        currentY = e.touches[0].clientY - initialY;
-                    } else {
-                        currentX = e.clientX - initialX;
-                        currentY = e.clientY - initialY;
-                    }
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-                }
-            }
-            function dragEnd() { isDragging = false; }
-        }
-
-        // --- PLAYER ---
-        function startDrill(gid, sid) {
-            const g = groups.find(x=>x.id==gid); const s = g.subfolders.find(x=>x.id==sid);
-            if(!s.sentences.length) return alert("Klasör Boş");
-            playlist = s.sentences; pLang = g.lang; pIndex = 0; activeSid = sid;
-            isPlaying = true; togglePlay(true);
-        }
-
-        function togglePlay(force=false) {
-            if(!force && isPlaying) {
-                isPlaying=false; window.speechSynthesis.cancel(); clearTimeout(playTimeout); clearInterval(progressInterval);
-                if(wakeLock) wakeLock.release();
+            if(idx !== null) {
+                const g = groups.find(x => x.id === gid);
+                const s = g.subfolders.find(x => x.id === sid);
+                const item = s.sentences[idx];
+                trInp.value = item.tr;
+                targetInp.value = item.target;
+                title.innerText = "Cümleyi Düzenle";
             } else {
-                isPlaying=true; reqWakeLock(); playLoop();
+                trInp.value = "";
+                targetInp.value = "";
+                title.innerText = "Yeni Cümle Ekle";
             }
-            updatePlayerUI();
-        }
-        
-        function stopPlayer() {
-            isPlaying=false; window.speechSynthesis.cancel(); clearTimeout(playTimeout); clearInterval(progressInterval); resetProgress(); updatePlayerUI();
+            document.getElementById('modal-sent').classList.add('active'); 
         }
 
-        function playLoop() {
+        // --- CRUD ACTIONS ---
+        function confirmAddGroup() {
+            const name = document.getElementById('inp-group-name').value;
+            const lang = document.getElementById('inp-group-lang').value;
+            if(name) {
+                groups.push({ id: Date.now().toString(), name, lang, subfolders: [] });
+                save(); renderLibrary(); closeModals();
+                document.getElementById('inp-group-name').value="";
+                showToast("Dil grubu oluşturuldu");
+            }
+        }
+
+        function confirmAddSub() {
+            const name = document.getElementById('inp-sub-name').value;
+            if(name && activeGroupId) {
+                const g = groups.find(x => x.id === activeGroupId);
+                g.subfolders.push({ id: Date.now().toString(), name, sentences: [] });
+                save(); renderLibrary(); closeModals();
+                document.getElementById('inp-sub-name').value="";
+                showToast("Klasör eklendi");
+            }
+        }
+
+        function confirmSent() {
+            const tr = document.getElementById('inp-sent-tr').value;
+            const target = document.getElementById('inp-sent-target').value;
+            
+            if(tr && target && activeGroupId && activeSubId) {
+                const g = groups.find(x => x.id === activeGroupId);
+                const s = g.subfolders.find(x => x.id === activeSubId);
+                
+                if(editSentIndex !== null) {
+                    s.sentences[editSentIndex] = {tr, target};
+                    showToast("Güncellendi");
+                } else {
+                    s.sentences.push({tr, target});
+                    showToast("Eklendi");
+                }
+                
+                save(); renderLibrary(); closeModals();
+            }
+        }
+
+        function deleteGroup(id) {
+            if(confirm("Bu dil grubu ve tüm içeriği silinecek! Emin misin?")) {
+                groups = groups.filter(x => x.id !== id);
+                save(); renderLibrary();
+            }
+        }
+
+        function deleteSub(gid, sid) {
+            if(confirm("Klasör ve içindeki cümleler silinsin mi?")) {
+                const g = groups.find(x => x.id === gid);
+                g.subfolders = g.subfolders.filter(x => x.id !== sid);
+                save(); renderLibrary();
+            }
+        }
+
+        function deleteSent(gid, sid, idx) {
+            if(confirm("Bu cümle silinsin mi?")) {
+                const g = groups.find(x => x.id === gid);
+                const s = g.subfolders.find(x => x.id === sid);
+                s.sentences.splice(idx, 1);
+                save(); renderLibrary();
+            }
+        }
+
+        function save() { localStorage.setItem('dm_v16_data', JSON.stringify(groups)); }
+
+        // --- PLAYER ENGINE ---
+        function startPlaylist(gid, sid) {
+            const g = groups.find(x => x.id === gid);
+            const s = g.subfolders.find(x => x.id === sid);
+            
+            if(!s || !s.sentences.length) {
+                showToast("Klasör boş, oynatılamaz.");
+                return;
+            }
+
+            playlist = s.sentences;
+            pLang = g.lang;
+            pIndex = 0;
+            
+            closeLibrary(); 
+            document.getElementById('action-sheet').classList.remove('open'); 
+            
+            isPlaying = true;
+            updateUI("OYNATILIYOR", s.name);
+            updatePlayIcon();
+            loop();
+        }
+
+        function togglePlay() {
+            if(isPlaying) {
+                isPlaying = false; synth.cancel(); clearTimeout(playTimeout);
+                updateUI("DURAKLATILDI", "...");
+            } else {
+                if(!playlist.length) { showToast("Önce kütüphaneden bir klasör başlatın"); openLibrary(); return; }
+                isPlaying = true; loop();
+            }
+            updatePlayIcon();
+        }
+
+        function loop() {
             if(!isPlaying) return;
             if(pIndex >= playlist.length) pIndex = 0;
+
             const item = playlist[pIndex];
+            updateUI("TÜRKÇE", item.tr);
             
-            updatePlayerUI("TÜRKÇE", item.tr); highlight(pIndex); resetProgress();
-            
-            speak(item.tr, 'tr-TR', 1.0, () => {
+            // Türkçe Konuş
+            speak(item.tr, 'tr-TR', () => {
                 if(!isPlaying) return;
-                updatePlayerUI("DÜŞÜN", item.tr); startProgress(settings.delay * 1000);
+                updateUI("DÜŞÜN...", item.tr);
                 playTimeout = setTimeout(() => {
                     if(!isPlaying) return;
-                    resetProgress(); updatePlayerUI("HEDEF", item.target);
-                    speak(item.target, pLang, 1.0, () => { 
+                    updateUI("CEVAP", item.target);
+                    // Hedef Dil Konuş
+                    speak(item.target, pLang, () => {
                         if(!isPlaying) return;
-                        updatePlayerUI("BEKLE", "...");
-                        playTimeout = setTimeout(() => { pIndex++; playLoop(); }, 1000);
+                        playTimeout = setTimeout(() => { pIndex++; loop(); }, 1500);
                     });
-                }, settings.delay * 1000);
+                }, 2000); // 2 sn düşünme süresi
             });
         }
 
-        function speak(t, l, r, cb) {
-            window.speechSynthesis.cancel();
-            currentUtterance = new SpeechSynthesisUtterance(t); // Global değişkene ata
-            currentUtterance.lang = l; 
-            currentUtterance.rate = r;
+        function speak(txt, lang, cb) {
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(txt);
+            u.lang = lang; u.rate = parseFloat(speed);
             
-            const voices = window.speechSynthesis.getVoices();
-            let v = null;
-            if (l.startsWith('tr')) {
-                const femaleKeywords = ['Yelda', 'Emel', 'Female', 'Women', 'Kadın', 'Siri'];
-                v = voices.find(voice => voice.lang.startsWith('tr') && femaleKeywords.some(k => voice.name.includes(k)));
-                if (!v) v = voices.find(voice => voice.lang.startsWith('tr') && voice.name.includes('Google'));
-                if (!v) v = voices.find(voice => voice.lang.startsWith('tr'));
-            } else {
-                v = voices.find(voice => voice.lang.startsWith(l.split('-')[0]));
-            }
-            if(v) currentUtterance.voice = v;
-            
-            currentUtterance.onend = cb; 
-            currentUtterance.onerror = (e) => { console.warn("Ses hatası", e); cb(); };
-            window.speechSynthesis.speak(currentUtterance);
+            // Ses Seçimi (Mümkünse Google veya Enhanced sesleri tercih et)
+            const voices = synth.getVoices();
+            let voice = voices.find(v => v.lang === lang && (v.name.includes('Google') || v.name.includes('Enhanced')));
+            if(!voice) voice = voices.find(v => v.lang === lang);
+            if(voice) u.voice = voice;
+
+            u.onend = () => cb && cb();
+            u.onerror = (e) => { console.log(e); cb && cb(); }; 
+            synth.speak(u);
         }
 
-        function startProgress(dur) {
-            clearInterval(progressInterval);
-            const b1 = document.getElementById('set-progress'), b2 = document.getElementById('ghost-progress');
-            let start = Date.now();
-            progressInterval = setInterval(() => {
-                let pct = ((Date.now() - start) / dur) * 100;
-                if(pct>=100) { pct=100; clearInterval(progressInterval); }
-                b1.style.width = pct+"%"; b2.style.width = pct+"%";
-            }, 50);
-        }
-        function resetProgress() {
-            clearInterval(progressInterval);
-            document.getElementById('set-progress').style.width="0%"; document.getElementById('ghost-progress').style.width="0%";
+        function updateUI(status, text) {
+            document.getElementById('pw-status').innerText = status;
+            document.getElementById('pw-text').innerText = text;
         }
 
-        async function reqWakeLock() { try{if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen');}catch(e){} }
-
-        function updatePlayerUI(s, t) {
-            const els = [{s:'set-status',t:'set-text',b:'set-play-btn'}, {s:'ghost-status',t:'ghost-text',b:'ghost-play-btn'}];
-            els.forEach(k => {
-                if(s) document.getElementById(k.s).innerText = s;
-                if(t) document.getElementById(k.t).innerText = t;
-                const btn = document.getElementById(k.b);
-                btn.innerHTML = isPlaying ? "⏸ Duraklat" : "▶ Devam Et";
-                btn.className = isPlaying ? "btn-ios btn-dark" : "btn-ios btn-primary";
-                if(k.b.includes('ghost')) btn.className = isPlaying ? "mini-btn btn-dark" : "mini-btn btn-blue";
-            });
+        function updatePlayIcon() {
+            document.getElementById('main-play-btn').innerText = isPlaying ? "⏸" : "▶";
+        }
+        
+        function updateSpeed(val) { 
+            speed = val; 
+            document.getElementById('speed-val').innerText = val + "x"; 
         }
 
-        function highlight(idx) {
-            document.querySelectorAll('.sentence-row').forEach(e=>e.classList.remove('active'));
-            const row = document.getElementById(`row-${activeSid}-${idx}`);
-            if(row) { row.classList.add('active'); row.scrollIntoView({behavior:'smooth', block:'nearest'}); }
-        }
-
-        function updateSettingsUI() {
-            document.getElementById('lbl-delay').innerText = settings.delay + 's';
-            document.getElementById('rng-delay').value = settings.delay;
-        }
-        function saveSettings() {
-            settings.delay = parseFloat(document.getElementById('rng-delay').value);
-            localStorage.setItem('dm_v7_settings', JSON.stringify(settings)); closeModal();
-        }
+        // --- BACKUP ---
         function downloadData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(groups));
             const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(groups));
-            a.download = "dm_yedek.json"; a.click();
+            a.href = dataStr; a.download = "dm_yedek.json"; a.click();
         }
+        
         function uploadData(inp) {
             const f = inp.files[0]; if(!f) return;
             const r = new FileReader();
-            r.onload = e => { try { groups=JSON.parse(e.target.result); sync(); alert("Yüklendi"); closeModal(); } catch(x){alert("Hata")} };
+            r.onload = e => { 
+                try { groups = JSON.parse(e.target.result); save(); showToast("Yüklendi"); renderLibrary(); } 
+                catch(x) { showToast("Hata"); } 
+            };
             r.readAsText(f);
         }
 
-        window.speechSynthesis.onvoiceschanged = () => {};
     </script>
 </body>
 </html>
