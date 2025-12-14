@@ -4,33 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="referrer" content="no-referrer">
-    <title>Dil Matkabı Pro v16.1</title>
+    <title>Dil Matkabı Pro v25 - Minimal</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
+    <!-- Sistem Fontları -->
     <style>
         :root {
+            /* PERFORMANS RENKLERİ */
             --bg-dark: #000000;
-            --panel-bg: #121212;
-            --surface-2: #1C1C1E;
-            --border: #333333;
-            --accent: #0A84FF;
-            --accent-dim: rgba(10, 132, 255, 0.15);
+            --panel-bg: #111111; 
+            --surface: #222222;
+            --border: #444444;
+            --accent: #0066FF;
             --text: #ffffff;
-            --text-sec: #98989D;
-            --danger: #FF453A;
-            --success: #32D74B;
-            --radius-M: 12px;
+            --text-sec: #aaaaaa;
+            --danger: #cc0000;
+            
             --safe-bottom: env(safe-area-inset-bottom, 20px);
             --safe-top: env(safe-area-inset-top, 20px);
         }
 
+        /* RESET */
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body { 
-            font-family: 'Inter', sans-serif; 
-            background: var(--bg-dark); color: var(--text); 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-dark); 
+            color: var(--text); 
             height: 100vh; overflow: hidden; 
             display: flex; flex-direction: column;
         }
@@ -38,186 +37,151 @@
         /* === TOAST === */
         #toast-container {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            z-index: 9999; width: 90%; max-width: 300px; pointer-events: none;
+            z-index: 9999; pointer-events: none; width: 90%; max-width: 300px;
         }
         .toast {
-            background: #222; border: 1px solid var(--border);
-            color: white; padding: 10px 15px; border-radius: 8px;
-            font-size: 13px; margin-bottom: 5px; text-align: center;
-            opacity: 0; transition: opacity 0.2s;
+            background: #333; border: 1px solid #555;
+            color: white; padding: 8px; text-align: center;
+            font-size: 12px; margin-bottom: 5px;
+            opacity: 0; transition: opacity 0.1s;
         }
         .toast.show { opacity: 1; }
 
-        /* === ANA SAHNE & TARAYICI === */
-        #main-stage { position: absolute; inset: 0; z-index: 1; background: #000; }
-        iframe { width: 100%; height: 100%; border: none; }
-        .iframe-placeholder {
-            position: absolute; inset: 0; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; color: var(--text-sec); z-index: -1;
-        }
-
-        /* === INTRO === */
+        /* === INTRO (Ultra Minimal) === */
         #intro-layer {
             position: absolute; inset: 0; background: #000; z-index: 50;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.2s;
         }
-        #intro-layer.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        #intro-layer.hidden { display: none; }
         
-        .search-container { position: relative; width: 90%; max-width: 400px; }
+        .search-container { width: 80%; max-width: 400px; }
+        
+        /* ÖZEL TASARIM: Çerçevesiz Input */
         .search-box {
-            background: #222; border: 1px solid var(--border);
-            padding: 15px; border-radius: 12px; width: 100%;
-            color: white; font-size: 16px;
+            width: 100%; 
+            background: transparent; /* Arka plan yok */
+            border: none; /* Çerçeve yok */
+            border-bottom: 1px solid #333; /* Sadece ince alt çizgi */
+            padding: 15px 5px; 
+            color: white; 
+            font-size: 24px; /* Büyük, okunaklı yazı */
+            text-align: center; /* Ortada yazsın */
+            font-weight: 300;
+            border-radius: 0;
+            transition: border-color 0.2s;
         }
-        .search-btn {
-            position: absolute; right: 0; top: 0; bottom: 0; width: 50px;
-            background: transparent; border: none; color: white; font-size: 20px;
+        .search-box:focus {
+            border-bottom-color: var(--accent); /* Odaklanınca çizgi mavi olsun */
+        }
+        .search-box::placeholder { opacity: 0; } /* Placeholder görünmesin */
+        
+        /* === ANA SAHNE === */
+        #main-stage { position: absolute; inset: 0; z-index: 1; background: #000; }
+        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+        .iframe-placeholder {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; 
+            color: #222; font-size: 12px; z-index: -1;
         }
 
-        /* === MAGIC BUTTON (M) === */
+        /* === M BUTONU === */
         #magic-btn {
             position: fixed; bottom: calc(var(--safe-bottom) + 20px); right: 20px;
-            width: 60px; height: 60px; border-radius: 50%;
-            background: var(--accent); color: white; border: none;
-            font-size: 24px; font-weight: 800; z-index: 100;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: transform 0.15s;
+            width: 55px; height: 55px; 
+            background: var(--accent); 
+            color: white; border: none; font-size: 20px; font-weight: bold;
+            z-index: 100; cursor: pointer;
+            border-radius: 50%;
         }
-        #magic-btn:active { transform: scale(0.95); }
+        #magic-btn:active { background: #0055cc; }
 
-        /* === ACTION SHEET (PANEL) === */
+        /* === PANEL === */
         #action-sheet {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--panel-bg); 
             border-top: 1px solid var(--border);
             padding: 15px 15px calc(var(--safe-bottom) + 15px) 15px;
             z-index: 95; 
-            transform: translateY(110%); 
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(100%); 
+            transition: transform 0.15s ease-out;
+            will-change: transform;
         }
         #action-sheet.open { transform: translateY(0); }
-        .sheet-handle { width: 40px; height: 4px; background: #333; margin: 0 auto 15px auto; border-radius: 2px; }
+        .sheet-handle { width: 50px; height: 4px; background: #333; margin: 0 auto 15px auto; }
 
-        /* Player Widget */
-        .player-widget {
-            background: var(--surface-2); border: 1px solid var(--border);
-            border-radius: 12px; padding: 12px;
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 15px;
+        /* Widgetlar */
+        .perf-box {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 10px; margin-bottom: 10px; display: flex; align-items: center;
         }
-        .pw-info { flex: 1; overflow: hidden; padding-right: 10px; }
-        .pw-status { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-        .pw-text { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:#eee; }
+        
+        .player-widget { justify-content: space-between; }
+        .pw-info { flex: 1; padding-right: 10px; overflow: hidden; }
+        .pw-status { font-size: 10px; color: var(--accent); font-weight: bold; }
+        .pw-text { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .pw-play { 
-            width: 44px; height: 44px; flex-shrink: 0;
-            border-radius: 50%; background: var(--accent); 
-            border:none; color: white; font-size: 18px;
-            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; background: var(--accent); border: none; 
+            color: white; font-size: 18px; cursor: pointer; flex-shrink: 0;
         }
 
-        .btn-main {
-            width: 100%; padding: 14px; background: #222; 
-            border: 1px solid var(--border); border-radius: 10px;
-            color: white; font-weight: 600; font-size: 15px;
-            margin-bottom: 15px;
+        .btn-block {
+            width: 100%; padding: 12px; background: var(--surface); 
+            border: 1px solid var(--border); color: white; 
+            font-size: 14px; cursor: pointer; text-align: center;
+            margin-bottom: 10px;
         }
-
-        /* === FULLSCREEN OVERLAY (KÜTÜPHANE) === */
-        .fullscreen-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 110;
-            transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-            display: flex; flex-direction: column;
-        }
-        .fullscreen-overlay.active { transform: translateY(0); }
-        
-        .overlay-header { 
-            padding: 15px; padding-top: calc(var(--safe-top) + 15px);
-            display: flex; align-items: center; justify-content: space-between; 
-            border-bottom: 1px solid var(--border); background: var(--panel-bg);
-        }
-        .overlay-title { font-size: 18px; font-weight: 700; }
-        .close-btn { font-size: 24px; padding: 0 10px; cursor: pointer; color: #888; }
-        .overlay-content { flex: 1; overflow-y: auto; padding: 15px; }
-
-        /* === KÜTÜPHANE STİLLERİ === */
-        .group-item {
-            margin-bottom: 15px; border: 1px solid var(--border); border-radius: var(--radius-M);
-            background: #0a0a0a; overflow: hidden;
-        }
-        .group-header {
-            padding: 12px 15px; background: rgba(255,255,255,0.03);
-            display: flex; justify-content: space-between; align-items: center;
-            font-weight: 600; font-size: 15px; cursor: pointer;
-        }
-        .group-lang-tag { 
-            font-size: 10px; background: var(--accent); color: white; 
-            padding: 2px 6px; border-radius: 4px; margin-right: 8px; 
-        }
-
-        .group-children { display: none; padding: 5px; border-top: 1px solid var(--border); }
-        .group-item.expanded .group-children { display: block; }
-
-        .subfolder-item {
-            margin: 5px 0; background: var(--surface-2); border-radius: 8px;
-            overflow: hidden;
-        }
-        .subfolder-header {
-            padding: 10px 12px; font-size: 14px; display: flex; justify-content: space-between;
-            align-items: center; cursor: pointer; color: #ddd;
-        }
-        .subfolder-header:hover { background: rgba(255,255,255,0.05); }
-
-        .subfolder-content { display: none; background: #000; border-top: 1px solid #333; }
-        .subfolder-item.expanded .subfolder-content { display: block; }
-
-        .sentence-row {
-            padding: 10px 12px; border-bottom: 1px solid #222; font-size: 13px;
-            display: flex; justify-content: space-between; align-items: center;
-            transition: background 0.2s;
-        }
-        .sent-text-group { flex: 1; }
-        .sent-tr { color: #fff; margin-bottom: 2px; }
-        .sent-target { color: var(--accent); font-family: monospace; }
-        
-        .sent-actions { display: flex; gap: 8px; margin-left: 10px; }
-        
-        .tree-btn { font-size: 12px; padding: 6px 10px; border-radius: 6px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; }
-        .tree-btn-play { background: var(--accent); color: white; width: 100%; margin: 5px 0; padding: 10px; font-weight: 600; border-radius: 8px; border:none; cursor:pointer;}
-        .icon-only-btn { background: none; border: none; color: #666; cursor: pointer; font-size: 16px; padding: 5px; }
-        .icon-only-btn:hover { color: #fff; }
-
-        /* === MODALLER === */
-        .modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
-            z-index: 200; display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: 0.2s;
-        }
-        .modal.active { opacity: 1; pointer-events: auto; }
-        .modal-box {
-            width: 90%; max-width: 340px; background: var(--surface-2);
-            border: 1px solid var(--border); border-radius: 20px; padding: 20px;
-            max-height: 85vh; overflow-y: auto;
-        }
-        .modal h3 { margin-bottom: 15px; font-size: 18px; text-align: center; font-weight: 700; }
-        
-        .input-field {
-            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-            padding: 14px; color: white; border-radius: 10px; margin-bottom: 12px; font-size: 15px;
-        }
-        .input-field:focus { border-color: var(--accent); }
-        select.input-field { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
-
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-full { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 15px;}
-        .btn-blue { background: var(--accent); color: white; }
-        .btn-gray { background: rgba(255,255,255,0.1); color: white; }
+        .btn-block:active { background: #333; }
 
         /* Slider */
         .slider-container { margin: 15px 0; }
-        .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-sec); margin-bottom: 8px; }
-        input[type=range] { width: 100%; accent-color: var(--accent); height: 4px; background: #333; border-radius: 2px; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 5px; }
+        input[type=range] { width: 100%; }
+
+        .btn-row { display: flex; gap: 5px; }
+        .btn-small { flex: 1; padding: 10px; background: #333; border: none; color: #ccc; font-size: 12px; cursor: pointer; }
+
+        /* === KÜTÜPHANE === */
+        .fullscreen-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 110;
+            display: none; flex-direction: column;
+        }
+        .fullscreen-overlay.active { display: flex; }
+        
+        .overlay-header { 
+            padding: 15px; padding-top: calc(var(--safe-top) + 15px);
+            background: var(--panel-bg); border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .overlay-content { flex: 1; overflow-y: auto; padding: 10px; -webkit-overflow-scrolling: touch; }
+
+        .group-item { margin-bottom: 10px; border: 1px solid var(--border); background: #080808; }
+        .group-header { padding: 12px; display: flex; justify-content: space-between; background: var(--surface); cursor: pointer; font-size: 14px;}
+        .group-children { display: none; padding: 5px; border-top: 1px solid var(--border); }
+        .group-item.expanded .group-children { display: block; }
+
+        .subfolder-item { margin-top: 5px; border: 1px solid #333; }
+        .subfolder-header { padding: 10px; background: #151515; font-size: 13px; display: flex; justify-content: space-between; cursor: pointer;}
+        .subfolder-content { display: none; padding: 5px; background: #000; }
+        .subfolder-item.expanded .subfolder-content { display: block; }
+
+        .sentence-row { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; font-size: 12px; }
+        .sent-tr { color: #fff; margin-bottom: 2px; }
+        .sent-target { color: var(--accent); font-family: monospace; }
+        
+        /* Modallar */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            z-index: 200; display: none; align-items: center; justify-content: center;
+        }
+        .modal.active { display: flex; }
+        .modal-box {
+            width: 90%; max-width: 300px; background: var(--panel-bg);
+            border: 1px solid var(--border); padding: 20px;
+        }
+        .input-perf { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: white; margin-bottom: 10px; }
+        
+        .u-btn { padding: 8px 12px; background: #333; color: white; border: 1px solid #555; cursor: pointer; margin-right: 5px; font-size: 11px; }
+        .u-btn-primary { background: var(--accent); border-color: var(--accent); }
+        .u-btn-danger { background: #500; border-color: #700; }
 
     </style>
 </head>
@@ -225,35 +189,32 @@
 
     <div id="toast-container"></div>
 
-    <!-- GİRİŞ -->
+    <!-- GİRİŞ (ULTRA MINIMAL - Sadece Input) -->
     <div id="intro-layer">
-        <div style="font-size:36px; font-weight:800; margin-bottom:20px;">Matkap<span style="color:var(--accent)">.</span></div>
         <div class="search-container">
             <input type="text" class="search-box" id="url-input" 
-                   placeholder="Web sitesi veya arama..." 
+                   placeholder="" 
                    autocomplete="off"
+                   spellcheck="false"
                    onkeypress="if(event.key==='Enter') loadUrl(this.value)">
-            <button class="search-btn" onclick="loadUrl(document.getElementById('url-input').value)">→</button>
         </div>
     </div>
 
     <!-- ANA SAHNE -->
     <div id="main-stage">
-        <div class="iframe-placeholder">
-            <p>Site Yüklenmedi</p>
-        </div>
-        <iframe id="webview" src="" allowfullscreen allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe>
+        <div class="iframe-placeholder"></div>
+        <iframe id="webview" src="" allowfullscreen></iframe>
     </div>
 
     <!-- M BUTONU -->
     <button id="magic-btn" onclick="toggleSheet()">M</button>
 
-    <!-- PANEL (ACTION SHEET) -->
+    <!-- PANEL -->
     <div id="action-sheet">
-        <div class="sheet-handle" onclick="toggleSheet()"></div>
+        <div class="sheet-handle"></div>
         
-        <!-- Oynatıcı Widget -->
-        <div class="player-widget">
+        <!-- Oynatıcı -->
+        <div class="perf-box player-widget">
             <div class="pw-info">
                 <div class="pw-status" id="pw-status">HAZIR</div>
                 <div class="pw-text" id="pw-text">---</div>
@@ -261,170 +222,136 @@
             <button class="pw-play" id="main-play-btn" onclick="togglePlay()">▶</button>
         </div>
 
-        <button class="btn-main" onclick="openLibrary()">📚 Kütüphaneyi Aç</button>
+        <button class="btn-block" onclick="openLibrary()">[ KÜTÜPHANE ]</button>
 
         <div class="slider-container">
-            <div class="slider-label"><span>Okuma Hızı</span><span id="speed-val">1.0x</span></div>
+            <div class="slider-label"><span>HIZ</span><span id="speed-val">1.0x</span></div>
             <input type="range" min="0.5" max="2" step="0.1" value="1" oninput="updateSpeed(this.value)">
         </div>
         
         <div class="btn-row">
-            <button class="btn-full btn-gray" onclick="downloadData()">Yedekle</button>
-            <button class="btn-full btn-gray" onclick="document.getElementById('file-up').click()">Yükle</button>
+            <button class="btn-small" onclick="downloadData()">YEDEKLE</button>
+            <button class="btn-small" onclick="document.getElementById('file-up').click()">YÜKLE</button>
             <input type="file" id="file-up" style="display:none" onchange="uploadData(this)">
         </div>
     </div>
 
-    <!-- KÜTÜPHANE OVERLAY (AĞAÇ YAPISI) -->
+    <!-- KÜTÜPHANE OVERLAY -->
     <div id="library-overlay" class="fullscreen-overlay">
         <div class="overlay-header">
-            <span class="overlay-title">Kütüphane</span>
-            <span class="close-btn" onclick="closeLibrary()">✕</span>
+            <span style="font-weight:bold">KÜTÜPHANE</span>
+            <button class="u-btn" onclick="closeLibrary()">KAPAT X</button>
         </div>
-        <div class="overlay-content" id="library-content">
-            <!-- JS ile doldurulacak -->
-        </div>
-        <div style="padding:15px; border-top:1px solid var(--border); background:var(--panel-bg);">
-            <button class="btn-full btn-gray" onclick="showAddGroupModal()">+ Yeni Dil Grubu</button>
+        <div class="overlay-content" id="library-content"></div>
+        <div style="padding:10px; background:#111; border-top:1px solid #333">
+            <button class="btn-block" onclick="showAddGroupModal()">+ YENİ GRUP</button>
         </div>
     </div>
 
-    <!-- --- MODALLAR --- -->
-
-    <!-- GRUP EKLEME -->
+    <!-- MODALLAR -->
     <div class="modal" id="modal-add-group">
         <div class="modal-box">
-            <h3>Yeni Dil Grubu</h3>
-            <input type="text" id="inp-group-name" class="input-field" placeholder="Grup Adı (Örn: Japonca)">
-            <select id="inp-group-lang" class="input-field">
-                <option value="ja-JP">Japonca (日本語)</option>
-                <option value="es-ES">İspanyolca (Español)</option>
-                <option value="ar-SA">Arapça (العربية)</option>
-                <option value="ru-RU">Rusça (Русский)</option>
-                <option value="de-DE">Almanca (Deutsch)</option>
-                <option value="en-US">İngilizce (English)</option>
+            <h3 style="margin-bottom:10px; text-align:center">GRUP EKLE</h3>
+            <input type="text" id="inp-group-name" class="input-perf" placeholder="Ad">
+            <select id="inp-group-lang" class="input-perf">
+                <option value="ja-JP">Japonca</option>
+                <option value="es-ES">İspanyolca</option>
+                <option value="ar-SA">Arapça</option>
+                <option value="ru-RU">Rusça</option>
+                <option value="de-DE">Almanca</option>
+                <option value="en-US">İngilizce</option>
             </select>
             <div class="btn-row">
-                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
-                <button class="btn-full btn-blue" onclick="confirmAddGroup()">Oluştur</button>
+                <button class="btn-small" onclick="closeModals()">İPTAL</button>
+                <button class="btn-small" style="background:var(--accent); color:white" onclick="confirmAddGroup()">EKLE</button>
             </div>
         </div>
     </div>
 
-    <!-- ALT KLASÖR EKLEME -->
     <div class="modal" id="modal-add-sub">
         <div class="modal-box">
-            <h3>Yeni Konu Klasörü</h3>
-            <div style="font-size:12px; color:#888; margin-bottom:10px; text-align:center;">Dil: <span id="lbl-parent-lang" style="color:var(--accent)"></span></div>
-            <input type="text" id="inp-sub-name" class="input-field" placeholder="Konu Adı (Örn: Fiiller)">
+            <h3 style="margin-bottom:10px; text-align:center">KONU EKLE</h3>
+            <div style="font-size:11px; margin-bottom:5px; text-align:center" id="lbl-parent-lang"></div>
+            <input type="text" id="inp-sub-name" class="input-perf" placeholder="Ad">
             <div class="btn-row">
-                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
-                <button class="btn-full btn-blue" onclick="confirmAddSub()">Ekle</button>
+                <button class="btn-small" onclick="closeModals()">İPTAL</button>
+                <button class="btn-small" style="background:var(--accent); color:white" onclick="confirmAddSub()">EKLE</button>
             </div>
         </div>
     </div>
 
-    <!-- CÜMLE EKLEME / DÜZENLEME -->
     <div class="modal" id="modal-sent">
         <div class="modal-box">
-            <h3 id="sent-modal-title">Cümle Ekle</h3>
-            <textarea id="inp-sent-tr" class="input-field" rows="3" placeholder="Türkçe Cümle"></textarea>
-            <textarea id="inp-sent-target" class="input-field" rows="3" placeholder="Hedef Dildeki Karşılığı"></textarea>
+            <h3 id="sent-modal-title" style="margin-bottom:10px; text-align:center">CÜMLE</h3>
+            <textarea id="inp-sent-tr" class="input-perf" rows="2" placeholder="TR"></textarea>
+            <textarea id="inp-sent-target" class="input-perf" rows="2" placeholder="HEDEF"></textarea>
             <div class="btn-row">
-                <button class="btn-full btn-gray" onclick="closeModals()">İptal</button>
-                <button class="btn-full btn-blue" onclick="confirmSent()">Kaydet</button>
+                <button class="btn-small" onclick="closeModals()">İPTAL</button>
+                <button class="btn-small" style="background:var(--accent); color:white" onclick="confirmSent()">KAYDET</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA & STATE ---
-        let groups = JSON.parse(localStorage.getItem('dm_v16_data')) || [];
-        
-        let activeGroupId = null;
-        let activeSubId = null;
-        let editSentIndex = null;
-
-        let isPlaying = false;
-        let playlist = [];
-        let pIndex = 0;
-        let pLang = 'en-US';
-        let playTimeout;
-        let speed = 1.0;
+        // --- AYNI MANTIK (LOGIC) KORUNDU ---
+        let groups = JSON.parse(localStorage.getItem('dm_v21_data')) || [];
+        let activeGroupId = null, activeSubId = null, editSentIndex = null;
+        let isPlaying = false, playlist = [], pIndex = 0, pLang = 'en-US', playTimeout, speed = 1.0;
         const synth = window.speechSynthesis;
 
-        // --- INIT ---
         window.addEventListener('load', () => {
             document.body.addEventListener('click', () => { if(!synth.speaking) synth.resume(); }, {once:true});
             renderLibrary();
         });
 
-        // --- TOAST ---
         function showToast(msg) {
             const c = document.getElementById('toast-container');
             const t = document.createElement('div');
             t.className = 'toast'; t.innerText = msg;
             c.appendChild(t);
-            requestAnimationFrame(() => t.classList.add('show'));
-            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 200); }, 2000);
+            // Force reflow
+            void t.offsetWidth;
+            t.classList.add('show');
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 100); }, 1500);
         }
 
-        // --- NAV & UI ---
         function loadUrl(val) {
             let url = val.trim();
             if(!url) return;
             if (!url.startsWith('http') && url.includes('.')) url = 'https://' + url;
-            else if (!url.includes('.')) url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
+            else if (!url.startsWith('http')) url = 'https://www.google.com/search?q=' + encodeURIComponent(val);
             
             document.getElementById('webview').src = url;
-            document.getElementById('intro-layer').classList.add('hidden');
+            // Display none performans için daha iyi (GPU layer'ı kaldırır)
+            document.getElementById('intro-layer').style.display = 'none';
         }
 
         function toggleSheet() { document.getElementById('action-sheet').classList.toggle('open'); }
-        
-        function openLibrary() {
-            renderLibrary();
-            document.getElementById('library-overlay').classList.add('active');
-        }
+        function openLibrary() { renderLibrary(); document.getElementById('library-overlay').classList.add('active'); }
         function closeLibrary() { document.getElementById('library-overlay').classList.remove('active'); }
         function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
 
-        // --- CORE LIBRARY LOGIC ---
         function renderLibrary() {
             const container = document.getElementById('library-content');
             container.innerHTML = "";
-
-            if(groups.length === 0) {
-                container.innerHTML = "<div style='text-align:center; color:#666; margin-top:50px'>Kütüphane boş.<br>Aşağıdan yeni bir dil grubu ekleyin.</div>";
-                return;
-            }
+            if(groups.length === 0) { container.innerHTML = "<div style='text-align:center;color:#666;margin-top:20px'>BOŞ</div>"; return; }
 
             groups.forEach(group => {
                 const gDiv = document.createElement('div');
                 gDiv.className = 'group-item';
                 gDiv.innerHTML = `
                     <div class="group-header" onclick="toggleExpand(this)">
-                        <div>
-                            <span class="group-lang-tag">${group.lang.split('-')[0].toUpperCase()}</span>
-                            ${group.name}
-                        </div>
-                        <div style="font-size:12px; opacity:0.5">▼</div>
+                        <span>[${group.lang.split('-')[0].toUpperCase()}] ${group.name}</span>
+                        <span>▼</span>
                     </div>
-                    <div class="group-children">
-                        <!-- Alt klasörler buraya -->
-                    </div>
-                `;
+                    <div class="group-children"></div>`;
                 container.appendChild(gDiv);
-
-                const childrenContainer = gDiv.querySelector('.group-children');
                 
-                const addSubBtn = document.createElement('button');
-                addSubBtn.className = 'tree-btn';
-                addSubBtn.style.width = '100%';
-                addSubBtn.style.marginBottom = '8px';
-                addSubBtn.innerText = "+ Yeni Konu Klasörü";
-                addSubBtn.onclick = (e) => { e.stopPropagation(); showAddSubModal(group.id, group.name); };
-                childrenContainer.appendChild(addSubBtn);
+                const childCont = gDiv.querySelector('.group-children');
+                const addBtn = document.createElement('button');
+                addBtn.className = 'u-btn'; addBtn.style.width='100%'; addBtn.style.marginBottom='5px';
+                addBtn.innerText = "+ KONU EKLE"; addBtn.onclick = (e)=>{e.stopPropagation(); showAddSubModal(group.id, group.name)};
+                childCont.appendChild(addBtn);
 
                 if(group.subfolders) {
                     group.subfolders.forEach(sub => {
@@ -432,247 +359,115 @@
                         sDiv.className = 'subfolder-item';
                         sDiv.innerHTML = `
                             <div class="subfolder-header" onclick="toggleExpand(this)">
-                                <span>📁 ${sub.name} <small style="color:#666">(${sub.sentences.length})</small></span>
-                                <button class="icon-only-btn" style="color:var(--danger)" onclick="event.stopPropagation(); deleteSub('${group.id}', '${sub.id}')">✕</button>
+                                <span>📁 ${sub.name} (${sub.sentences.length})</span>
+                                <button class="u-btn u-btn-danger" style="padding:2px 6px" onclick="event.stopPropagation();deleteSub('${group.id}','${sub.id}')">X</button>
                             </div>
                             <div class="subfolder-content">
-                                <div style="padding:10px">
-                                    <button class="tree-btn-play" onclick="startPlaylist('${group.id}', '${sub.id}')">▶ BU KLASÖRÜ BAŞLAT</button>
-                                    <button class="tree-btn" style="width:100%; margin-top:5px; padding:10px;" onclick="showSentModal('${group.id}', '${sub.id}', null)">+ Cümle Ekle</button>
+                                <div style="margin-bottom:5px; display:flex; gap:5px">
+                                    <button class="u-btn u-btn-primary" style="flex:1" onclick="startPlaylist('${group.id}','${sub.id}')">OYNAT</button>
+                                    <button class="u-btn" style="flex:1" onclick="showSentModal('${group.id}','${sub.id}',null)">EKLE</button>
                                 </div>
-                                <div id="list-${sub.id}">
-                                    ${sub.sentences.map((s, idx) => `
-                                        <div class="sentence-row">
-                                            <div class="sent-text-group">
-                                                <div class="sent-tr">${s.tr}</div>
-                                                <div class="sent-target">${s.target}</div>
-                                            </div>
-                                            <div class="sent-actions">
-                                                <button class="icon-only-btn" style="color:var(--accent)" onclick="showSentModal('${group.id}', '${sub.id}', ${idx})">✎</button>
-                                                <button class="icon-only-btn" style="color:var(--danger)" onclick="deleteSent('${group.id}', '${sub.id}', ${idx})">✕</button>
-                                            </div>
+                                <div>${sub.sentences.map((s,i)=>`
+                                    <div class="sentence-row">
+                                        <div style="flex:1; margin-right:5px">
+                                            <div class="sent-tr">${s.tr}</div>
+                                            <div class="sent-target">${s.target}</div>
                                         </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                        childrenContainer.appendChild(sDiv);
+                                        <div>
+                                            <button class="u-btn" onclick="showSentModal('${group.id}','${sub.id}',${i})">D</button>
+                                            <button class="u-btn u-btn-danger" onclick="deleteSent('${group.id}','${sub.id}',${i})">X</button>
+                                        </div>
+                                    </div>`).join('')}</div>
+                            </div>`;
+                        childCont.appendChild(sDiv);
                     });
                 }
-                
-                const delGroupBtn = document.createElement('div');
-                delGroupBtn.style.padding = "5px"; delGroupBtn.style.textAlign="center";
-                delGroupBtn.innerHTML = `<button class="tree-btn" style="color:var(--danger); background:transparent" onclick="deleteGroup('${group.id}')">Grubu Sil</button>`;
-                childrenContainer.appendChild(delGroupBtn);
+                const delDiv = document.createElement('div'); delDiv.style.padding="5px"; delDiv.style.textAlign="center";
+                delDiv.innerHTML = `<button class="u-btn u-btn-danger" style="width:100%" onclick="deleteGroup('${group.id}')">GRUBU SİL</button>`;
+                childCont.appendChild(delDiv);
             });
         }
-
         function toggleExpand(el) { el.parentElement.classList.toggle('expanded'); }
 
-        // --- MODAL CONTROLLERS ---
-        function showAddGroupModal() { document.getElementById('modal-add-group').classList.add('active'); }
-        
-        function showAddSubModal(gid, gname) { 
-            activeGroupId = gid; 
-            document.getElementById('lbl-parent-lang').innerText = gname;
-            document.getElementById('modal-add-sub').classList.add('active'); 
+        function showAddGroupModal(){ document.getElementById('modal-add-group').classList.add('active'); }
+        function showAddSubModal(gid, name){ activeGroupId=gid; document.getElementById('lbl-parent-lang').innerText=name; document.getElementById('modal-add-sub').classList.add('active'); }
+        function showSentModal(gid, sid, idx){
+            activeGroupId=gid; activeSubId=sid; editSentIndex=idx;
+            const tr=document.getElementById('inp-sent-tr'), tgt=document.getElementById('inp-sent-target');
+            if(idx!==null){ const s=groups.find(x=>x.id==gid).subfolders.find(x=>x.id==sid).sentences[idx]; tr.value=s.tr; tgt.value=s.target; }
+            else{ tr.value=""; tgt.value=""; }
+            document.getElementById('modal-sent').classList.add('active');
         }
-        
-        function showSentModal(gid, sid, idx) { 
-            activeGroupId = gid; activeSubId = sid; editSentIndex = idx;
-            
-            const trInp = document.getElementById('inp-sent-tr');
-            const targetInp = document.getElementById('inp-sent-target');
-            const title = document.getElementById('sent-modal-title');
-
-            if(idx !== null) {
-                const g = groups.find(x => x.id === gid);
-                const s = g.subfolders.find(x => x.id === sid);
-                const item = s.sentences[idx];
-                trInp.value = item.tr;
-                targetInp.value = item.target;
-                title.innerText = "Cümleyi Düzenle";
-            } else {
-                trInp.value = "";
-                targetInp.value = "";
-                title.innerText = "Yeni Cümle Ekle";
-            }
-            document.getElementById('modal-sent').classList.add('active'); 
+        function confirmAddGroup(){
+            const n=document.getElementById('inp-group-name').value, l=document.getElementById('inp-group-lang').value;
+            if(n){ groups.push({id:Date.now().toString(), name:n, lang:l, subfolders:[]}); save(); renderLibrary(); closeModals(); }
         }
-
-        // --- CRUD ACTIONS ---
-        function confirmAddGroup() {
-            const name = document.getElementById('inp-group-name').value;
-            const lang = document.getElementById('inp-group-lang').value;
-            if(name) {
-                groups.push({ id: Date.now().toString(), name, lang, subfolders: [] });
-                save(); renderLibrary(); closeModals();
-                document.getElementById('inp-group-name').value="";
-                showToast("Dil grubu oluşturuldu");
-            }
+        function confirmAddSub(){
+            const n=document.getElementById('inp-sub-name').value;
+            if(n && activeGroupId){ groups.find(x=>x.id==activeGroupId).subfolders.push({id:Date.now().toString(), name:n, sentences:[]}); save(); renderLibrary(); closeModals(); }
         }
-
-        function confirmAddSub() {
-            const name = document.getElementById('inp-sub-name').value;
-            if(name && activeGroupId) {
-                const g = groups.find(x => x.id === activeGroupId);
-                g.subfolders.push({ id: Date.now().toString(), name, sentences: [] });
-                save(); renderLibrary(); closeModals();
-                document.getElementById('inp-sub-name').value="";
-                showToast("Klasör eklendi");
-            }
-        }
-
-        function confirmSent() {
-            const tr = document.getElementById('inp-sent-tr').value;
-            const target = document.getElementById('inp-sent-target').value;
-            
-            if(tr && target && activeGroupId && activeSubId) {
-                const g = groups.find(x => x.id === activeGroupId);
-                const s = g.subfolders.find(x => x.id === activeSubId);
-                
-                if(editSentIndex !== null) {
-                    s.sentences[editSentIndex] = {tr, target};
-                    showToast("Güncellendi");
-                } else {
-                    s.sentences.push({tr, target});
-                    showToast("Eklendi");
-                }
-                
+        function confirmSent(){
+            const tr=document.getElementById('inp-sent-tr').value, tgt=document.getElementById('inp-sent-target').value;
+            if(tr && tgt && activeGroupId){
+                const s=groups.find(x=>x.id==activeGroupId).subfolders.find(x=>x.id==activeSubId).sentences;
+                if(editSentIndex!==null) s[editSentIndex]={tr,target:tgt}; else s.push({tr,target:tgt});
                 save(); renderLibrary(); closeModals();
             }
         }
+        function deleteGroup(id){ if(confirm("Sil?")) { groups=groups.filter(x=>x.id!==id); save(); renderLibrary(); } }
+        function deleteSub(gid, sid){ if(confirm("Sil?")) { const g=groups.find(x=>x.id==gid); g.subfolders=g.subfolders.filter(x=>x.id!==sid); save(); renderLibrary(); } }
+        function deleteSent(gid, sid, idx){ if(confirm("Sil?")) { groups.find(x=>x.id==gid).subfolders.find(x=>x.id==sid).sentences.splice(idx,1); save(); renderLibrary(); } }
+        function save(){ localStorage.setItem('dm_v21_data', JSON.stringify(groups)); }
 
-        function deleteGroup(id) {
-            if(confirm("Bu dil grubu ve tüm içeriği silinecek! Emin misin?")) {
-                groups = groups.filter(x => x.id !== id);
-                save(); renderLibrary();
-            }
+        function startPlaylist(gid, sid){
+            const g=groups.find(x=>x.id==gid), s=g.subfolders.find(x=>x.id==sid);
+            if(!s.sentences.length) return showToast("Boş");
+            playlist=s.sentences; pLang=g.lang; pIndex=0;
+            closeLibrary(); document.getElementById('action-sheet').classList.remove('open');
+            isPlaying=true; updatePlayIcon(); loop(); updateUI("OYNATILIYOR", s.name);
         }
-
-        function deleteSub(gid, sid) {
-            if(confirm("Klasör ve içindeki cümleler silinsin mi?")) {
-                const g = groups.find(x => x.id === gid);
-                g.subfolders = g.subfolders.filter(x => x.id !== sid);
-                save(); renderLibrary();
-            }
-        }
-
-        function deleteSent(gid, sid, idx) {
-            if(confirm("Bu cümle silinsin mi?")) {
-                const g = groups.find(x => x.id === gid);
-                const s = g.subfolders.find(x => x.id === sid);
-                s.sentences.splice(idx, 1);
-                save(); renderLibrary();
-            }
-        }
-
-        function save() { localStorage.setItem('dm_v16_data', JSON.stringify(groups)); }
-
-        // --- PLAYER ENGINE ---
-        function startPlaylist(gid, sid) {
-            const g = groups.find(x => x.id === gid);
-            const s = g.subfolders.find(x => x.id === sid);
-            
-            if(!s || !s.sentences.length) {
-                showToast("Klasör boş, oynatılamaz.");
-                return;
-            }
-
-            playlist = s.sentences;
-            pLang = g.lang;
-            pIndex = 0;
-            
-            closeLibrary(); 
-            document.getElementById('action-sheet').classList.remove('open'); 
-            
-            isPlaying = true;
-            updateUI("OYNATILIYOR", s.name);
-            updatePlayIcon();
-            loop();
-        }
-
-        function togglePlay() {
-            if(isPlaying) {
-                isPlaying = false; synth.cancel(); clearTimeout(playTimeout);
-                updateUI("DURAKLATILDI", "...");
-            } else {
-                if(!playlist.length) { showToast("Önce kütüphaneden bir klasör başlatın"); openLibrary(); return; }
-                isPlaying = true; loop();
-            }
+        function togglePlay(){
+            if(isPlaying){ isPlaying=false; synth.cancel(); clearTimeout(playTimeout); updateUI("DURAKLATILDI","..."); }
+            else{ if(!playlist.length){showToast("Seçim Yok"); openLibrary(); return;} isPlaying=true; loop(); }
             updatePlayIcon();
         }
-
-        function loop() {
+        function loop(){
             if(!isPlaying) return;
-            if(pIndex >= playlist.length) pIndex = 0;
-
-            const item = playlist[pIndex];
+            if(pIndex>=playlist.length) pIndex=0;
+            const item=playlist[pIndex];
             updateUI("TÜRKÇE", item.tr);
-            
-            // Türkçe Konuş
-            speak(item.tr, 'tr-TR', () => {
+            speak(item.tr, 'tr-TR', ()=>{
                 if(!isPlaying) return;
-                updateUI("DÜŞÜN...", item.tr);
-                playTimeout = setTimeout(() => {
+                updateUI("...", item.tr);
+                playTimeout=setTimeout(()=>{
                     if(!isPlaying) return;
                     updateUI("CEVAP", item.target);
-                    // Hedef Dil Konuş
-                    speak(item.target, pLang, () => {
+                    speak(item.target, pLang, ()=>{
                         if(!isPlaying) return;
-                        playTimeout = setTimeout(() => { pIndex++; loop(); }, 1500);
+                        playTimeout=setTimeout(()=>{ pIndex++; loop(); }, 1500);
                     });
-                }, 2000); // 2 sn düşünme süresi
+                }, 2000);
             });
         }
-
-        function speak(txt, lang, cb) {
-            synth.cancel();
-            const u = new SpeechSynthesisUtterance(txt);
-            u.lang = lang; u.rate = parseFloat(speed);
-            
-            // Ses Seçimi (Mümkünse Google veya Enhanced sesleri tercih et)
-            const voices = synth.getVoices();
-            let voice = voices.find(v => v.lang === lang && (v.name.includes('Google') || v.name.includes('Enhanced')));
-            if(!voice) voice = voices.find(v => v.lang === lang);
-            if(voice) u.voice = voice;
-
-            u.onend = () => cb && cb();
-            u.onerror = (e) => { console.log(e); cb && cb(); }; 
-            synth.speak(u);
+        function speak(txt, lang, cb){
+            synth.cancel(); const u=new SpeechSynthesisUtterance(txt); u.lang=lang; u.rate=parseFloat(speed);
+            const vs=synth.getVoices(); let v=vs.find(x=>x.lang==lang&&(x.name.includes('Google')||x.name.includes('Enhanced')));
+            if(!v) v=vs.find(x=>x.lang==lang); if(v) u.voice=v;
+            u.onend=cb; u.onerror=cb; synth.speak(u);
         }
+        function updateUI(s, t){ document.getElementById('pw-status').innerText=s; document.getElementById('pw-text').innerText=t; }
+        function updatePlayIcon(){ document.getElementById('main-play-btn').innerText=isPlaying?"⏸":"▶"; }
+        function updateSpeed(v){ speed=v; document.getElementById('speed-val').innerText=v+"x"; }
 
-        function updateUI(status, text) {
-            document.getElementById('pw-status').innerText = status;
-            document.getElementById('pw-text').innerText = text;
+        function downloadData(){
+            const a=document.createElement('a'); a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(groups));
+            a.download="dm_yedek.json"; a.click();
         }
-
-        function updatePlayIcon() {
-            document.getElementById('main-play-btn').innerText = isPlaying ? "⏸" : "▶";
-        }
-        
-        function updateSpeed(val) { 
-            speed = val; 
-            document.getElementById('speed-val').innerText = val + "x"; 
-        }
-
-        // --- BACKUP ---
-        function downloadData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(groups));
-            const a = document.createElement('a');
-            a.href = dataStr; a.download = "dm_yedek.json"; a.click();
-        }
-        
-        function uploadData(inp) {
-            const f = inp.files[0]; if(!f) return;
-            const r = new FileReader();
-            r.onload = e => { 
-                try { groups = JSON.parse(e.target.result); save(); showToast("Yüklendi"); renderLibrary(); } 
-                catch(x) { showToast("Hata"); } 
-            };
+        function uploadData(inp){
+            const f=inp.files[0]; if(!f)return;
+            const r=new FileReader(); r.onload=e=>{ try{groups=JSON.parse(e.target.result); save(); showToast("Tamam"); renderLibrary();}catch(x){showToast("Hata");} };
             r.readAsText(f);
         }
-
     </script>
 </body>
 </html>
