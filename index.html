@@ -2,445 +2,177 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dil Matkabı Browser</title>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #000;
-            color: #fff;
-            overflow: hidden;
-            height: 100vh;
-        }
+        /* === TEMEL AYARLAR === */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: #fff; overflow: hidden; height: 100vh; }
 
         /* ANA EKRAN */
         #home-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #000;
-            z-index: 100;
-            transition: opacity 0.3s;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, #000000 0%, #1a1a2e 100%); z-index: 100; transition: opacity 0.3s;
         }
-
-        #home-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .logo {
-            font-size: 48px;
-            font-weight: 700;
-            margin-bottom: 30px;
-        }
-
-        .logo span {
-            color: #0A84FF;
-        }
-
+        #home-screen.hidden { opacity: 0; pointer-events: none; }
+        .logo { font-size: 48px; font-weight: 700; margin-bottom: 30px; text-align: center; }
+        .logo span { color: #0A84FF; }
+        .search-container { width: 90%; max-width: 500px; }
         .search-box {
-            width: 90%;
-            max-width: 400px;
-            height: 50px;
-            background: #1C1C1E;
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 0 15px;
-            font-size: 17px;
-            color: #fff;
+            width: 100%; height: 50px; background: #1C1C1E; border: 2px solid #333; border-radius: 12px;
+            padding: 0 15px; font-size: 17px; color: #fff; transition: border-color 0.3s;
         }
+        .search-box:focus { border-color: #0A84FF; outline: none; }
+        .search-hint { text-align: center; color: #666; font-size: 14px; margin-top: 15px; }
 
         /* TARAYICI EKRANI */
         #browser-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
-
-        #browser-screen.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #browser-screen.active { opacity: 1; pointer-events: auto; }
 
         /* ÜST BAR */
         .top-bar {
-            height: 60px;
-            background: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            padding: 0 10px;
-            gap: 10px;
-            border-bottom: 1px solid #333;
+            height: 60px; background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(20px);
+            display: flex; align-items: center; padding: 0 10px; gap: 10px; border-bottom: 1px solid #333;
         }
-
         .nav-btn {
-            width: 40px;
-            height: 40px;
-            background: none;
-            border: none;
-            color: #0A84FF;
-            font-size: 24px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-width: 40px; height: 40px; background: none; border: none; color: #0A84FF;
+            font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
-
         .url-display {
-            flex: 1;
-            height: 36px;
-            background: rgba(118, 118, 128, 0.24);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 14px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            padding: 0 10px;
+            flex: 1; height: 36px; background: rgba(118, 118, 128, 0.24); border-radius: 10px;
+            display: flex; align-items: center; padding: 0 12px; color: #fff; font-size: 13px; overflow: hidden;
         }
+        .url-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* WEB GÖRÜNÜMÜ */
-        .webview-container {
-            flex: 1;
-            background: #fff;
-            position: relative;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+        .webview-container { flex: 1; background: #fff; position: relative; overflow: hidden; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .loading-bar { position: absolute; top: 0; left: 0; height: 3px; background: #0A84FF; width: 0%; transition: width 0.3s; z-index: 10; }
 
         /* ALT BAR */
         .bottom-bar {
-            height: 70px;
-            background: rgba(28, 28, 30, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #333;
-            padding-bottom: 10px;
+            height: 70px; background: rgba(28, 28, 30, 0.95); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #333; padding-bottom: 10px;
         }
 
         /* YAN MENÜ (DRILL) */
         #drill-sidebar {
-            position: fixed;
-            top: 0;
-            left: -85%;
-            width: 85%;
-            height: 100%;
-            background: #1C1C1E;
-            z-index: 200;
-            transition: left 0.3s;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+            position: fixed; top: 0; left: -85%; width: 85%; max-width: 350px; height: 100%;
+            background: #1C1C1E; z-index: 200; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; flex-direction: column; box-shadow: 5px 0 20px rgba(0,0,0,0.5);
         }
-
-        #drill-sidebar.open {
-            left: 0;
-        }
-
+        #drill-sidebar.open { left: 0; }
         .sidebar-header {
-            height: 60px;
-            background: #2C2C2E;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            border-bottom: 1px solid #444;
+            height: 60px; background: #2C2C2E; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 15px; border-bottom: 1px solid #444;
         }
-
-        .sidebar-title {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 15px;
-        }
-
-        /* KLASÖR YAPISI */
-        .folder-item {
-            background: #2C2C2E;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            overflow: hidden;
-        }
-
-        .folder-header {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .folder-icon {
-            font-size: 20px;
-            margin-right: 10px;
-        }
-
-        .folder-name {
-            flex: 1;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .folder-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: #0A84FF;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .folder-children {
-            padding-left: 20px;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s;
-        }
-
-        .folder-item.expanded .folder-children {
-            max-height: 2000px;
-        }
-
-        /* CÜMLE LİSTESİ */
-        .sentence-list {
-            background: #1A1A1C;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        .sentence-item {
-            background: #2C2C2E;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .sentence-tr {
-            color: #fff;
-            margin-bottom: 5px;
-        }
-
-        .sentence-target {
-            color: #0A84FF;
-        }
+        .sidebar-title { font-size: 18px; font-weight: 700; }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 15px; }
 
         /* OYNATICI KONTROLLER */
         .player-controls {
-            background: #0A84FF;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: none;
+            background: linear-gradient(135deg, #0A84FF, #0066CC); padding: 15px; margin: 0 15px 15px 15px;
+            border-radius: 12px; display: none; /* Başlangıçta gizli */
         }
-
-        .player-controls.active {
-            display: block;
-        }
-
+        .player-controls.active { display: block; }
         .player-info {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 14px;
+            background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-bottom: 12px;
+            font-size: 13px; line-height: 1.4; min-height: 40px; color: #fff;
         }
-
-        .player-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
+        .player-buttons { display: flex; gap: 10px; }
         .player-btn {
-            flex: 1;
-            height: 45px;
-            background: rgba(255,255,255,0.2);
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
+            flex: 1; height: 40px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
         }
+        .player-btn.stop { background: rgba(255, 59, 48, 0.3); border-color: rgba(255, 59, 48, 0.5); }
 
-        .player-btn:active {
-            background: rgba(255,255,255,0.3);
+        /* KLASÖR YAPISI */
+        .folder-item { background: #2C2C2E; border-radius: 8px; margin-bottom: 8px; border: 1px solid #333; overflow: hidden; }
+        .folder-header { display: flex; align-items: center; padding: 12px; cursor: pointer; transition: background 0.2s; }
+        .folder-header:active { background: rgba(255,255,255,0.05); }
+        .folder-icon { font-size: 20px; margin-right: 10px; }
+        .folder-name { flex: 1; font-size: 15px; font-weight: 500; }
+        .folder-actions { display: flex; gap: 5px; }
+        .action-btn {
+            background: none; border: none; color: #0A84FF; font-size: 16px; cursor: pointer;
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
         }
-
-        /* BUTONLAR */
-        .add-btn {
-            width: 100%;
-            height: 45px;
-            background: #0A84FF;
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
+        .action-btn:active { background: rgba(10, 132, 255, 0.2); }
+        
+        .folder-children { padding-left: 10px; display: none; } /* Kapalı başlar */
+        .folder-item.expanded > .folder-children { display: block; } /* Açılınca görünür */
+        
+        /* CÜMLE LİSTESİ */
+        .sentence-list { background: #1A1A1C; padding: 5px; border-top: 1px solid #444; }
+        .sentence-item {
+            background: #252527; border-radius: 6px; padding: 10px; margin-bottom: 5px;
+            font-size: 13px; border-left: 3px solid #444; transition: all 0.2s;
         }
+        .sentence-item.playing { border-left-color: #32D74B; background: #1e3a23; } /* Oynatılan renk */
+        
+        .sentence-tr { color: #fff; margin-bottom: 4px; font-weight: 500; }
+        .sentence-target { color: #0A84FF; font-family: monospace; }
 
-        /* MODAL */
+        /* MODAL (Popup) */
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center;
+            z-index: 300; padding: 20px;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: #1C1C1E;
-            border-radius: 12px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
+            background: #1C1C1E; border-radius: 16px; padding: 20px; width: 100%; max-width: 350px;
+            border: 1px solid #333;
         }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 15px;
+        .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #fff; }
+        .modal-input, .modal-textarea {
+            width: 100%; background: #2C2C2E; border: 1px solid #444; border-radius: 8px;
+            padding: 10px; color: #fff; font-size: 16px; margin-bottom: 10px;
         }
-
-        .modal-input {
-            width: 100%;
-            height: 45px;
-            background: #2C2C2E;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 0 15px;
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .modal-textarea {
-            width: 100%;
-            height: 100px;
-            background: #2C2C2E;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 10px;
-            color: #fff;
-            font-size: 16px;
-            resize: none;
-            margin-bottom: 10px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
+        .modal-buttons { display: flex; gap: 10px; margin-top: 15px; }
         .modal-btn {
-            flex: 1;
-            height: 45px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
+            flex: 1; height: 44px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;
         }
-
-        .modal-btn.primary {
-            background: #0A84FF;
-            color: #fff;
-        }
-
-        .modal-btn.secondary {
-            background: #2C2C2E;
-            color: #fff;
-        }
-
+        .modal-btn.primary { background: #0A84FF; color: white; }
+        .modal-btn.secondary { background: #333; color: white; }
+        
         /* OVERLAY */
         #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 150;
-            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 150; display: none; backdrop-filter: blur(2px);
         }
-
-        #overlay.active {
-            display: block;
-        }
+        #overlay.active { display: block; }
+        .add-main-btn { width: 100%; padding: 15px; background: #0A84FF; color: white; border: none; font-weight: bold; font-size: 16px; border-top: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <!-- ANA EKRAN -->
+    <!-- GİRİŞ EKRANI -->
     <div id="home-screen">
         <div class="logo">Dil<span>Matkabı</span></div>
-        <input type="text" class="search-box" id="search-input" placeholder="Ara veya web sitesi yaz...">
+        <div class="search-container">
+            <input type="text" class="search-box" id="search-input" placeholder="Site adresi veya arama..." autocomplete="off">
+            <div class="search-hint">Google, Wikipedia veya bir kelime yazın</div>
+        </div>
     </div>
 
     <!-- TARAYICI EKRANI -->
     <div id="browser-screen">
         <div class="top-bar">
             <button class="nav-btn" onclick="toggleSidebar()">📚</button>
-            <div class="url-display" id="url-display">google.com</div>
+            <div class="url-display"><span class="url-text" id="url-display">google.com</span></div>
             <button class="nav-btn" onclick="reloadPage()">🔄</button>
         </div>
-        
         <div class="webview-container">
+            <div class="loading-bar" id="loading-bar"></div>
             <iframe id="webview" src=""></iframe>
         </div>
-        
         <div class="bottom-bar">
             <button class="nav-btn" onclick="goBack()">◀</button>
             <button class="nav-btn" onclick="goForward()">▶</button>
@@ -449,406 +181,405 @@
         </div>
     </div>
 
-    <!-- YAN MENÜ (DRILL) -->
+    <!-- YAN MENÜ (MATKAP) -->
     <div id="overlay" onclick="toggleSidebar()"></div>
     <div id="drill-sidebar">
         <div class="sidebar-header">
             <span class="sidebar-title">🧪 Dil Laboratuvarı</span>
             <button class="nav-btn" onclick="toggleSidebar()">✕</button>
         </div>
-        
-        <div id="player-section" class="player-controls">
-            <div class="player-info" id="player-info">Klasör seçin...</div>
+
+        <!-- OYNATICI -->
+        <div id="player-controls" class="player-controls">
+            <div class="player-info" id="player-status">Hazır</div>
             <div class="player-buttons">
-                <button class="player-btn" onclick="startPlaying()">▶ PLAY</button>
-                <button class="player-btn" onclick="stopPlaying()">⏹ STOP</button>
+                <button class="player-btn" onclick="playFolder()">▶ Oynat</button>
+                <button class="player-btn stop" onclick="stopPlayer()">⏹ Durdur</button>
             </div>
         </div>
-        
-        <div class="sidebar-content" id="folder-tree">
-            <!-- Klasörler buraya gelecek -->
-        </div>
-        <button class="add-btn" onclick="showAddFolderModal()">+ Yeni Klasör</button>
+
+        <div class="sidebar-content" id="folder-tree"></div>
+        <button class="add-main-btn" onclick="showAddFolderModal()">+ Yeni Ana Klasör</button>
     </div>
 
-    <!-- MODAL: KLASÖR EKLE -->
+    <!-- MODALLER -->
     <div class="modal" id="add-folder-modal">
         <div class="modal-content">
-            <div class="modal-title">Yeni Klasör</div>
-            <input type="text" class="modal-input" id="folder-name-input" placeholder="Klasör adı (örn: Almanca)">
+            <div class="modal-title">Klasör Oluştur</div>
+            <input type="text" class="modal-input" id="folder-name" placeholder="Klasör Adı (örn: Almanca)">
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal()">İptal</button>
-                <button class="modal-btn primary" onclick="addFolder()">Oluştur</button>
+                <button class="modal-btn primary" onclick="confirmAddFolder()">Oluştur</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: CÜMLE EKLE -->
     <div class="modal" id="add-sentence-modal">
         <div class="modal-content">
-            <div class="modal-title">Yeni Cümle</div>
-            <textarea class="modal-textarea" id="sentence-tr-input" placeholder="Türkçe cümle..."></textarea>
-            <textarea class="modal-textarea" id="sentence-target-input" placeholder="Hedef dil cümle..."></textarea>
+            <div class="modal-title">Cümle Ekle</div>
+            <textarea class="modal-textarea" id="sent-tr" placeholder="Türkçe: Yiyor musun?"></textarea>
+            <textarea class="modal-textarea" id="sent-target" placeholder="Hedef: Isst du?"></textarea>
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeModal()">İptal</button>
-                <button class="modal-btn primary" onclick="addSentence()">Kaydet</button>
+                <button class="modal-btn primary" onclick="confirmAddSentence()">Ekle</button>
             </div>
         </div>
     </div>
 
     <script>
-        // VERİ YAPISI
-        let folders = JSON.parse(localStorage.getItem('folders')) || [];
-        let currentFolderId = null;
-        let selectedFolderId = null;
+        // --- VERİTABANI VE DEĞİŞKENLER ---
+        let folders = JSON.parse(localStorage.getItem('dm_folders')) || [];
+        let currentFolderId = null; // İşlem yapılan klasör
+        let activePlayerFolderId = null; // Oynatılan klasör
         let isPlaying = false;
-        let playInterval = null;
-        let currentSentenceIndex = 0;
-        let playStep = 0; // 0: Türkçe, 1: Bekle, 2: Hedef dil
-
-        // DİL ALGILAMA
-        const languageMap = {
-            'almanca': 'de-DE',
-            'german': 'de-DE',
-            'deutsch': 'de-DE',
-            'ingilizce': 'en-US',
-            'english': 'en-US',
-            'ispanyolca': 'es-ES',
-            'spanish': 'es-ES',
-            'español': 'es-ES',
-            'fransizca': 'fr-FR',
-            'french': 'fr-FR',
-            'français': 'fr-FR',
-            'italyanca': 'it-IT',
-            'italian': 'it-IT',
-            'italiano': 'it-IT',
-            'japonca': 'ja-JP',
-            'japanese': 'ja-JP',
-            'rusca': 'ru-RU',
-            'russian': 'ru-RU',
-            'çince': 'zh-CN',
-            'chinese': 'zh-CN',
-            'arapça': 'ar-SA',
-            'arabic': 'ar-SA'
+        let playIndex = 0;
+        let playTimeout;
+        let activeSentenceList = [];
+        
+        // Dil Tahmin Haritası (Klasör adına göre)
+        const langMap = {
+            'almanca': 'de-DE', 'german': 'de-DE', 'de': 'de-DE',
+            'ingilizce': 'en-US', 'english': 'en-US', 'en': 'en-US',
+            'ispanyolca': 'es-ES', 'spanish': 'es-ES', 'es': 'es-ES',
+            'fransizca': 'fr-FR', 'french': 'fr-FR', 'fr': 'fr-FR',
+            'japonca': 'ja-JP', 'japanese': 'ja-JP', 'jp': 'ja-JP',
+            'rusca': 'ru-RU', 'russian': 'ru-RU', 'ru': 'ru-RU',
+            'arapça': 'ar-SA', 'arabic': 'ar-SA', 'ar': 'ar-SA'
         };
 
-        function detectLanguage(folderName) {
-            const name = folderName.toLowerCase();
-            for (let key in languageMap) {
-                if (name.includes(key)) {
-                    return languageMap[key];
-                }
-            }
-            return 'en-US'; // Varsayılan
-        }
+        // --- BAŞLANGIÇ ---
+        renderFolders();
 
-        // TARAYICI FONKSİYONLARI
+        // --- TARAYICI MOTORU ---
         const homeScreen = document.getElementById('home-screen');
         const browserScreen = document.getElementById('browser-screen');
         const searchInput = document.getElementById('search-input');
         const webview = document.getElementById('webview');
         const urlDisplay = document.getElementById('url-display');
+        const loadingBar = document.getElementById('loading-bar');
 
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                loadUrl(searchInput.value);
+        searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') loadUrl(searchInput.value); });
+
+        function loadUrl(val) {
+            if(!val) return;
+            let url = val.trim();
+            // Google Arama veya URL kontrolü
+            if (!url.includes('.') || url.includes(' ')) {
+                url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
+            } else if (!url.startsWith('http')) {
+                url = 'https://' + url;
             }
-        });
-
-        function loadUrl(query) {
-            let url = query.trim();
-            if (!url) return;
-
-            if (url.includes('.') && !url.includes(' ')) {
-                if (!url.startsWith('http')) url = 'https://' + url;
-            } else {
-                url = 'https://www.google.com/search?q=' + encodeURIComponent(url);
-            }
-
+            
             homeScreen.classList.add('hidden');
             browserScreen.classList.add('active');
+            loadingBar.style.width = '70%';
             webview.src = url;
-            urlDisplay.textContent = url.replace('https://', '').replace('www.', '').split('/')[0];
+            
+            try { urlDisplay.textContent = new URL(url).hostname; } catch { urlDisplay.textContent = "Yükleniyor..."; }
+            
+            webview.onload = () => { loadingBar.style.width = '100%'; setTimeout(()=>loadingBar.style.width='0', 300); };
         }
 
         function goHome() {
-            homeScreen.classList.remove('hidden');
             browserScreen.classList.remove('active');
-            webview.src = '';
-            searchInput.value = '';
+            homeScreen.classList.remove('hidden');
+            webview.src = "";
+            searchInput.value = "";
         }
-
-        function goBack() { history.back(); }
-        function goForward() { history.forward(); }
+        function goBack() { try{history.back()}catch(e){} }
+        function goForward() { try{history.forward()}catch(e){} }
         function reloadPage() { webview.src = webview.src; }
-        function sharePage() {
-            const url = webview.src;
-            if (navigator.share) {
-                navigator.share({ url: url });
-            } else {
-                navigator.clipboard.writeText(url);
-                alert('Link kopyalandı!');
-            }
-        }
+        function sharePage() { navigator.clipboard.writeText(webview.src); alert("Link Kopyalandı"); }
 
-        // YAN MENÜ
+        // --- MENÜ KONTROLLERİ ---
         const sidebar = document.getElementById('drill-sidebar');
         const overlay = document.getElementById('overlay');
+        function toggleSidebar() { sidebar.classList.toggle('open'); overlay.classList.toggle('active'); }
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('active');
-        }
+        // --- KLASÖR SİSTEMİ (CRUD) ---
+        function saveFolders() { localStorage.setItem('dm_folders', JSON.stringify(folders)); }
 
-        // KLASÖR SİSTEMİ
         function renderFolders() {
             const tree = document.getElementById('folder-tree');
-            tree.innerHTML = '';
-            folders.forEach(folder => {
-                tree.appendChild(createFolderElement(folder));
-            });
-            saveFolders();
+            tree.innerHTML = "";
+            if(folders.length === 0) {
+                tree.innerHTML = "<div style='color:#666; text-align:center; margin-top:20px;'>Henüz klasör yok.<br>Yeni ekleyerek başla!</div>";
+                return;
+            }
+            // Ana klasörleri listele
+            folders.forEach(f => tree.appendChild(createFolderEl(f, 0)));
         }
 
-        function createFolderElement(folder, level = 0) {
+        function createFolderEl(folder, level) {
             const div = document.createElement('div');
             div.className = 'folder-item';
-            div.style.marginLeft = (level * 10) + 'px';
-
+            if(level > 0) div.style.marginLeft = (level * 15) + "px"; // Girinti
+            
+            // Başlık Çubuğu
             const header = document.createElement('div');
             header.className = 'folder-header';
-            header.onclick = () => toggleFolder(div);
+            header.onclick = (e) => { 
+                // Tıklayınca aç/kapa, eğer oynatıcı değilse
+                div.classList.toggle('expanded');
+                // Oynatıcıyı bu klasöre hazırla
+                preparePlayer(folder);
+            };
 
-            const playBtn = folder.sentences && folder.sentences.length > 0 
-                ? `<button class="action-btn" onclick="event.stopPropagation(); selectFolder('${folder.id}')">▶️</button>`
-                : '';
+            const title = document.createElement('span');
+            title.className = 'folder-name';
+            title.textContent = (folder.children ? "📁 " : "📄 ") + folder.name;
 
-            header.innerHTML = `
-                <span class="folder-icon">📁</span>
-                <span class="folder-name">${folder.name}</span>
-                <div class="folder-actions" onclick="event.stopPropagation()">
-                    ${playBtn}
-                    <button class="action-btn" onclick="showAddSentenceModal('${folder.id}')">➕</button>
-                    <button class="action-btn" onclick="addSubfolder('${folder.id}')">📂</button>
-                    <button class="action-btn" onclick="deleteFolder('${folder.id}')">🗑️</button>
-                </div>
-            `;
+            const actions = document.createElement('div');
+            actions.className = 'folder-actions';
+            
+            // Ekle Butonu (+)
+            const addBtn = document.createElement('button');
+            addBtn.className = 'action-btn';
+            addBtn.innerHTML = '+';
+            addBtn.onclick = (e) => { e.stopPropagation(); showAddOptions(folder.id); };
 
-            const children = document.createElement('div');
-            children.className = 'folder-children';
+            // Sil Butonu (x)
+            const delBtn = document.createElement('button');
+            delBtn.className = 'action-btn';
+            delBtn.innerHTML = '🗑';
+            delBtn.style.color = '#F43F5E';
+            delBtn.onclick = (e) => { e.stopPropagation(); deleteFolder(folder.id); };
 
-            // Cümleler
-            if (folder.sentences && folder.sentences.length > 0) {
-                const sentenceList = document.createElement('div');
-                sentenceList.className = 'sentence-list';
-                folder.sentences.forEach(s => {
-                    sentenceList.innerHTML += `
-                        <div class="sentence-item">
-                            <div class="sentence-tr">${s.turkish}</div>
-                            <div class="sentence-target">${s.target}</div>
-                        </div>
-                    `;
-                });
-                children.appendChild(sentenceList);
-            }
-
-            // Alt klasörler
-            if (folder.children) {
-                folder.children.forEach(child => {
-                    children.appendChild(createFolderElement(child, level + 1));
-                });
-            }
-
+            actions.appendChild(addBtn);
+            actions.appendChild(delBtn);
+            header.appendChild(title);
+            header.appendChild(actions);
             div.appendChild(header);
-            div.appendChild(children);
+
+            // İçerik Alanı (Alt klasörler ve Cümleler)
+            const childrenContainer = document.createElement('div');
+            childrenContainer.className = 'folder-children';
+            
+            // Varsa cümleleri listele
+            if(folder.sentences && folder.sentences.length > 0) {
+                const sentList = document.createElement('div');
+                sentList.className = 'sentence-list';
+                folder.sentences.forEach((s, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'sentence-item';
+                    row.id = `sent-${folder.id}-${idx}`; // Oynatırken bulmak için ID
+                    row.innerHTML = `<div class="sentence-tr">${s.tr}</div><div class="sentence-target">➜ ${s.target}</div>`;
+                    // Çift tıklayınca sil
+                    row.ondblclick = () => deleteSentence(folder.id, idx);
+                    sentList.appendChild(row);
+                });
+                childrenContainer.appendChild(sentList);
+            }
+
+            // Varsa alt klasörleri listele
+            if(folder.children && folder.children.length > 0) {
+                folder.children.forEach(child => {
+                    childrenContainer.appendChild(createFolderEl(child, level + 1));
+                });
+            }
+
+            div.appendChild(childrenContainer);
             return div;
         }
 
-        function toggleFolder(element) {
-            element.classList.toggle('expanded');
+        // --- VERİ EKLEME MANTIĞI ---
+        function showAddOptions(parentId) {
+            // Kullanıcıya sor: Alt klasör mü, cümle mi?
+            // Basitlik için: Eğer cümle varsa cümle ekle, yoksa modal aç sor (Şimdilik direkt soralım)
+            if(confirm("Klasör mü ekleyeceksin (Tamam), Cümle mi (İptal)?")) {
+                showAddFolderModal(parentId);
+            } else {
+                showAddSentenceModal(parentId);
+            }
         }
 
+        // Klasör Ekleme
         function showAddFolderModal(parentId = null) {
             currentFolderId = parentId;
             document.getElementById('add-folder-modal').classList.add('active');
-            document.getElementById('folder-name-input').value = '';
+            document.getElementById('folder-name').focus();
         }
-
-        function addFolder() {
-            const name = document.getElementById('folder-name-input').value.trim();
-            if (!name) return;
-
-            const newFolder = {
-                id: Date.now().toString(),
-                name: name,
-                children: [],
-                sentences: []
-            };
-
-            if (currentFolderId) {
-                const parent = findFolder(folders, currentFolderId);
-                if (parent) parent.children.push(newFolder);
+        
+        function confirmAddFolder() {
+            const name = document.getElementById('folder-name').value.trim();
+            if(!name) return;
+            
+            const newFolder = { id: Date.now().toString(), name: name, children: [], sentences: [] };
+            
+            if(currentFolderId === null) {
+                folders.push(newFolder); // Ana köke ekle
             } else {
-                folders.push(newFolder);
+                const parent = findFolder(folders, currentFolderId);
+                if(parent) parent.children.push(newFolder);
             }
-
-            renderFolders();
-            closeModal();
+            
+            saveFolders(); renderFolders(); closeModal();
+            document.getElementById('folder-name').value = "";
         }
 
-        function addSubfolder(parentId) {
-            showAddFolderModal(parentId);
+        // Cümle Ekleme
+        function showAddSentenceModal(folderId) {
+            currentFolderId = folderId;
+            document.getElementById('add-sentence-modal').classList.add('active');
+            document.getElementById('sent-tr').focus();
         }
 
+        function confirmAddSentence() {
+            const tr = document.getElementById('sent-tr').value.trim();
+            const target = document.getElementById('sent-target').value.trim();
+            if(!tr || !target) return;
+
+            const parent = findFolder(folders, currentFolderId);
+            if(parent) {
+                if(!parent.sentences) parent.sentences = [];
+                parent.sentences.push({ tr: tr, target: target });
+                saveFolders(); renderFolders(); closeModal();
+                document.getElementById('sent-tr').value = "";
+                document.getElementById('sent-target').value = "";
+            }
+        }
+
+        // Silme
         function deleteFolder(id) {
-            if (confirm('Bu klasörü silmek istediğinize emin misiniz?')) {
-                folders = removeFolderById(folders, id);
-                renderFolders();
+            if(confirm("Silmek istediğine emin misin?")) {
+                // Recursive silme (kökten veya daldan)
+                const remove = (arr) => {
+                    const idx = arr.findIndex(f => f.id === id);
+                    if(idx > -1) { arr.splice(idx, 1); return true; }
+                    for(let f of arr) { if(f.children && remove(f.children)) return true; }
+                    return false;
+                };
+                remove(folders);
+                saveFolders(); renderFolders();
             }
         }
 
-        function removeFolderById(arr, id) {
-            return arr.filter(f => {
-                if (f.id === id) return false;
-                if (f.children) f.children = removeFolderById(f.children, id);
-                return true;
-            });
+        function deleteSentence(folderId, sentenceIndex) {
+            if(confirm("Bu cümleyi sil?")) {
+                const folder = findFolder(folders, folderId);
+                if(folder && folder.sentences) {
+                    folder.sentences.splice(sentenceIndex, 1);
+                    saveFolders(); renderFolders();
+                }
+            }
         }
 
-        function findFolder(arr, id) {
-            for (let f of arr) {
-                if (f.id === id) return f;
-                if (f.children) {
-                    const found = findFolder(f.children, id);
-                    if (found) return found;
+        // Yardımcı: ID ile klasör bulma (Recursive)
+        function findFolder(list, id) {
+            for(let item of list) {
+                if(item.id === id) return item;
+                if(item.children) {
+                    const res = findFolder(item.children, id);
+                    if(res) return res;
                 }
             }
             return null;
         }
 
-        // CÜMLE SİSTEMİ
-        function showAddSentenceModal(folderId) {
-            currentFolderId = folderId;
-            document.getElementById('add-sentence-modal').classList.add('active');
-            document.getElementById('sentence-tr-input').value = '';
-            document.getElementById('sentence-target-input').value = '';
-        }
-
-        function addSentence() {
-            const tr = document.getElementById('sentence-tr-input').value.trim();
-            const target = document.getElementById('sentence-target-input').value.trim();
-            if (!tr || !target) return;
-
-            const folder = findFolder(folders, currentFolderId);
-            if (folder) {
-                folder.sentences.push({ turkish: tr, target: target });
-                renderFolders();
-                closeModal();
-            }
-        }
-
-        // OYNATICI SİSTEMİ
-        function selectFolder(folderId) {
-            selectedFolderId = folderId;
-            const folder = findFolder(folders, folderId);
-            if (folder) {
-                document.getElementById('player-section').classList.add('active');
-                document.getElementById('player-info').textContent = `📁 ${folder.name} (${folder.sentences.length} cümle)`;
-            }
-        }
-
-        function startPlaying() {
-            if (!selectedFolderId || isPlaying) return;
-            
-            const folder = findFolder(folders, selectedFolderId);
-            if (!folder || !folder.sentences || folder.sentences.length === 0) {
-                alert('Bu klasörde cümle yok!');
-                return;
-            }
-
-            isPlaying = true;
-            currentSentenceIndex = 0;
-            playStep = 0;
-            
-            const targetLang = detectLanguage(getFolderPath(folder));
-            playNextStep(folder, targetLang);
-        }
-
-        function playNextStep(folder, targetLang) {
-            if (!isPlaying) return;
-
-            const sentences = folder.sentences;
-            if (currentSentenceIndex >= sentences.length) {
-                currentSentenceIndex = 0; // Loop
-            }
-
-            const sentence = sentences[currentSentenceIndex];
-            
-            if (playStep === 0) {
-                // Türkçe okuma
-                document.getElementById('player-info').textContent = 
-                    `🇹🇷 ${sentence.turkish} (${currentSentenceIndex + 1}/${sentences.length})`;
-                speak(sentence.turkish, 'tr-TR');
-                playStep = 1;
-                setTimeout(() => playNextStep(folder, targetLang), calculateWaitTime(sentence.turkish) + 500);
-                
-            } else if (playStep === 1) {
-                // Bekleme
-                document.getElementById('player-info').textContent = '⏳ Bekleniyor...';
-                playStep = 2;
-                setTimeout(() => playNextStep(folder, targetLang), 2000); // 2 saniye bekle
-                
-            } else if (playStep === 2) {
-                // Hedef dil okuma
-                document.getElementById('player-info').textContent = 
-                    `🌍 ${sentence.target} (${currentSentenceIndex + 1}/${sentences.length})`;
-                speak(sentence.target, targetLang);
-                playStep = 0;
-                currentSentenceIndex++;
-                setTimeout(() => playNextStep(folder, targetLang), calculateWaitTime(sentence.target) + 1000);
-            }
-        }
-
-        function stopPlaying() {
-            isPlaying = false;
-            window.speechSynthesis.cancel();
-            document.getElementById('player-info').textContent = '⏹ Durduruldu';
-        }
-
-        function speak(text, lang) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang;
-                utterance.rate = 0.85;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function calculateWaitTime(text) {
-            // Kelime sayısına göre bekleme süresi (her kelime ~400ms)
-            const words = text.split(' ').length;
-            return words * 400;
-        }
-
-        function getFolderPath(folder) {
-            // Klasör yolunu al (dil algılama için)
-            return folder.name;
-        }
-
-        // MODAL YÖNETİMİ
         function closeModal() {
             document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
         }
 
-        // LOCALSTORAGE
-        function saveFolders() {
-            localStorage.setItem('folders', JSON.stringify(folders));
+        // --- OYNATICI MOTORU (THE ENGINE) ---
+        function preparePlayer(folder) {
+            // Eğer klasörde cümle varsa oynatıcıyı göster
+            if(folder.sentences && folder.sentences.length > 0) {
+                activePlayerFolderId = folder.id;
+                activeSentenceList = folder.sentences;
+                document.getElementById('player-controls').classList.add('active');
+                document.getElementById('player-status').innerHTML = `Seçili: <b>${folder.name}</b> (${folder.sentences.length} Cümle)<br>Dili tahmin etmeye çalışacağım...`;
+            } else {
+                // Cümle yoksa gizle
+                document.getElementById('player-controls').classList.remove('active');
+            }
         }
 
-        // İLK YÜKLEME
-        renderFolders();
-    </script>
+        function startPlaying() {
+            if(isPlaying) return;
+            if(!activeSentenceList.length) return;
+            
+            isPlaying = true;
+            playIndex = 0;
+            document.querySelector('.player-btn').style.background = '#32D74B'; // Yeşil yap
+            playLoop();
+        }
 
+        function stopPlayer() {
+            isPlaying = false;
+            clearTimeout(playTimeout);
+            window.speechSynthesis.cancel();
+            document.querySelector('.player-btn').style.background = '#0A84FF'; // Mavi yap
+            document.getElementById('player-status').innerText = "Durduruldu.";
+            // Renkleri temizle
+            document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('playing'));
+        }
+
+        function playLoop() {
+            if(!isPlaying) return;
+            if(playIndex >= activeSentenceList.length) {
+                playIndex = 0; // Başa sar (Sonsuz Döngü)
+            }
+
+            const item = activeSentenceList[playIndex];
+            const trText = item.tr;
+            const targetText = item.target;
+            
+            // Görsel Vurgulama
+            document.querySelectorAll('.sentence-item').forEach(el => el.classList.remove('playing'));
+            const currentEl = document.getElementById(`sent-${activePlayerFolderId}-${playIndex}`);
+            if(currentEl) {
+                currentEl.classList.add('playing');
+                currentEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // Durum Güncelle
+            const statusBox = document.getElementById('player-status');
+            
+            // ADIM 1: Türkçe Söyle
+            statusBox.innerText = `🔊 Türkçe: ${trText}`;
+            speak(trText, 'tr-TR', () => {
+                
+                // ADIM 2: Bekle (Gap Effect)
+                // Cümle uzunluğuna göre bekleme süresi hesapla (kelime * 600ms + 2sn)
+                const waitTime = (targetText.split(' ').length * 600) + 2000;
+                statusBox.innerText = `⏳ Bekleniyor... (${Math.floor(waitTime/1000)}sn)`;
+                
+                playTimeout = setTimeout(() => {
+                    if(!isPlaying) return;
+
+                    // ADIM 3: Hedef Dili Söyle
+                    statusBox.innerText = `🔊 Hedef: ${targetText}`;
+                    
+                    // Dili bulmak için üst klasör isimlerine bakmak lazım ama
+                    // şimdilik metinden tahmin edelim (daha kolay)
+                    let targetLang = 'de-DE'; // Varsayılan
+                    if(targetText.match(/[\u3000-\u309f]/)) targetLang = 'ja-JP';
+                    else if(targetText.match(/[\u0400-\u04FF]/)) targetLang = 'ru-RU';
+                    else if(targetText.match(/[\u0600-\u06FF]/)) targetLang = 'ar-SA';
+                    else if(targetText.match(/[¿¡ñ]/)) targetLang = 'es-ES';
+
+                    speak(targetText, targetLang, () => {
+                        // ADIM 4: Sonraki Cümleye Geç
+                        playIndex++;
+                        playTimeout = setTimeout(playLoop, 1000); // 1 sn ara ver
+                    });
+
+                }, waitTime);
+            });
+        }
+
+        // Konuşma Fonksiyonu (Callback ile)
+        function speak(text, lang, onEnd) {
+            if(!isPlaying) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang;
+            u.rate = 0.9; // Biraz yavaş ve net
+            u.onend = onEnd;
+            u.onerror = onEnd; // Hata olsa da devam et
+            window.speechSynthesis.speak(u);
+        }
+
+    </script>
 </body>
 </html>
